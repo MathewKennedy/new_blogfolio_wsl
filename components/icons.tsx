@@ -26,7 +26,8 @@ export const Icons = {
       </svg>
     ),
     linkedin: (props: IconProps) => (
-      <svg xmlns="http://www.w3.org/2000/svg" 
+      <svg xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor" 
       width="24" 
       height="24" 
       viewBox="0 0 24 24"

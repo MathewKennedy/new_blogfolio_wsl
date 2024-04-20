@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTheme } from "next-themes";
-import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
 
@@ -17,5 +17,16 @@ export function ModeToggle(){
                 <span className="sr-only">Toggle theme</span>
             </Button>
         </DropdownMenuTrigger>
+        <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => setTheme("light")}>
+                Light
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("dark")}>
+                Dark
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("system")}>
+                System
+            </DropdownMenuItem>
+        </DropdownMenuContent>
     </DropdownMenu>)
 }
