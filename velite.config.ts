@@ -1,0 +1,54 @@
+import { defineConfig, defineCollection, s} from "velite";
+
+// syntax here is setting computedFields to a generic arrow function
+// the generic type used must extend an object with a slug property set to a string type
+
+// example of extends being used:
+// const y: object & { slug: string } = s; // error
+// const z: object & { slug: string } = { slug: "hello" }; // okay
+
+// it takes in a data argument of generic type T
+// parenthesis around curly brackets is immediate return
+
+// this takes in a post with a slug object, copies it, and adds slugAsParams, which is the same as slug but with /blog/ removed
+const computedFields = <T extends {slug:string}>(data: T) => ({
+    ...data,
+    slugAsParams: data.slug.split("/").slice(1).join("/")
+});
+
+const posts = defineCollection({
+  name: "Post",
+  pattern: "blog/**/*.mdx",
+  schema: s.object({
+    slug: s.path(),
+    title: s.string().max(99),
+    description: s.string().max(999).optional(),
+    date: s.isodate(),
+    published: s.boolean().default(true),
+    body: s.mdx()
+  })
+  .transform(computedFields)
+})
+
+// above, .transform is chained on the return value of s.object()
+// it's a function to pass the result of s.object() to
+
+// export the defineConfig return value as default, telling velite where to find mdx and other files
+// argument object to defineConfig must contain a collections property, this contains our defined collection
+export default defineConfig({
+    root: "content",
+    output: {
+        data: ".velite",
+        assets: "public/static",
+        base: "/static/",
+        name: "[name]-[hash:6].[ext]",
+        clean: true
+    },
+    collections: {
+        posts
+    },
+    mdx: {
+        rehypePlugins: [],
+        remarkPlugins: []
+    }
+})
