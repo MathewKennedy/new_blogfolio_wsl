@@ -18,6 +18,13 @@ export default async function BlogPage(){
                 </div>
             </div>
             <hr className="mt-8"/>
+            {displayPosts?.length > 0 ? (
+                <ul className="flex flex-col">
+                    
+                </ul>
+            ) : (
+                <div>There are no posts to show right now.</div>
+            )}
         </div>
     )   
 }
