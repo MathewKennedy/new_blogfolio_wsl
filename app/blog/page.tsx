@@ -1,9 +1,12 @@
 import React from "react";
 import { posts } from "#site/content";
+import { PostItem } from "@/components/post-item";
+import { sortPosts } from "@/lib/utils";
 
 export default async function BlogPage(){
 
-    const displayPosts = posts;
+    const sortedPosts = sortPosts(posts.filter((post) => post.published));
+    const displayPosts = sortedPosts;
 
     // potential to filter and read tags here
 
@@ -20,7 +23,14 @@ export default async function BlogPage(){
             <hr className="mt-8"/>
             {displayPosts?.length > 0 ? (
                 <ul className="flex flex-col">
-                    
+                    {displayPosts.map((post) => {
+                        const { slug, date, title, description } = post;
+                        return (
+                            <li key={slug}>
+                                <PostItem slug={slug} date={date} title={title} description={description} />
+                            </li>
+                        )
+                    })}
                 </ul>
             ) : (
                 <div>There are no posts to show right now.</div>

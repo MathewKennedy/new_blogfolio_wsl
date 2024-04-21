@@ -1,8 +1,8 @@
 import React from "react";
-import { Link } from "next/link";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { buttonVariants } from "./ui/button";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
+import Link from "next/link";
 
 interface PostItemProps {
     slug: string,
@@ -29,11 +29,11 @@ export function PostItem({slug, title, description, date} : PostItemProps){
                     <dt className="sr-only">Published On</dt>
                     <dd className="text-sm sm:text-base font-medium flex items-center gap-1">
                         <CalendarIcon className="h-4 w-4"/>
-                        <time dateTime={date}>{date}</time>
+                        <time dateTime={date}>{formatDate(date)}</time>
                     </dd>
                 </dl>
                 <Link href={slug} className={cn(buttonVariants({variant: "link"}), "py-0")}>
-                    Read more ➡️
+                    Read more &rarr;
                 </Link>
             </div>
         </article>
