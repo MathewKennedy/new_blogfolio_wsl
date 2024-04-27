@@ -1,3 +1,4 @@
+import React from "react"
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -18,7 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-pt-[3.5rem]">
+    // added suppressHydrationWarning to get rid of warning for extra styles
+    <html lang="en" className="scroll-pt-[3.5rem]" suppressHydrationWarning> 
       <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
         <Providers>
           <div className="relative flex min-h-dvh flex-col bg-background">

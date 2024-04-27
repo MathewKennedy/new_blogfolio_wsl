@@ -2,11 +2,28 @@ import React from "react";
 import { posts } from "#site/content";
 import { PostItem } from "@/components/post-item";
 import { sortPosts } from "@/lib/utils";
+import { QueryPagination } from "@/components/query-pagination";
 
-export default async function BlogPage(){
+const POSTS_PER_PAGE = 5;
 
+interface BlogPageProps {
+    searchParams: {
+        page?: string
+    }
+}
+
+export default async function BlogPage({ searchParams } : BlogPageProps){
+
+    const currentPage = Number(searchParams?.page) || 1;
     const sortedPosts = sortPosts(posts.filter((post) => post.published));
-    const displayPosts = sortedPosts;
+    const totalPages = Math.ceil(sortedPosts.length / POSTS_PER_PAGE)
+
+    console.log("totalPages on the BlogPage component is:", totalPages)
+
+    const displayPosts = sortedPosts.slice(
+        POSTS_PER_PAGE * (currentPage - 1),
+        POSTS_PER_PAGE * currentPage
+    )
 
     // potential to filter and read tags here
 
@@ -35,6 +52,9 @@ export default async function BlogPage(){
             ) : (
                 <div>There are no posts to show right now.</div>
             )}
+            <QueryPagination 
+                totalPages={totalPages}    
+            />
         </div>
     )   
 }
