@@ -1,4 +1,7 @@
 import { defineConfig, defineCollection, s} from "velite";
+import rehypeSlug from "rehype-slug";
+import rehypePrettyCode from "rehype-pretty-code";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 // syntax here is setting computedFields to a generic arrow function
 // the generic type used must extend an object with a slug property set to a string type
@@ -48,7 +51,25 @@ export default defineConfig({
         posts
     },
     mdx: {
-        rehypePlugins: [],
+        rehypePlugins: [
+            rehypeSlug, 
+            [
+                rehypePrettyCode, 
+                { 
+                    theme: "github-dark"
+                }
+            ], 
+            [
+                rehypeAutolinkHeadings, 
+                { 
+                    behavior: "wrap", 
+                    properties: { 
+                    className: ["subheading-anchor"], 
+                    ariaLabel: "Link to section"
+                    }
+                }
+            ]
+        ],
         remarkPlugins: []
     }
 })
