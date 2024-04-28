@@ -1,6 +1,13 @@
 import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { siteConfig } from "@/config/site";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "About Me",
+    description: "Information about software engineer Mathew Kennedy",
+    
+}
 
 export default async function AboutPage(){
     return <div className="container max-w-6xl py-6 lg:py-10">
