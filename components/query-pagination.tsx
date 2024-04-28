@@ -17,9 +17,6 @@ export function QueryPagination ({ totalPages, className } : QueryPaginationProp
     const prevPage = currentPage - 1
     const nextPage = currentPage + 1
 
-    console.log("totalPages in QueryPagination function componenet is:", totalPages) // 1 always
-
-
     const createPageURL = (pageNumber: number | string) => {
         const params = new URLSearchParams(searchParams);
         params.set("page", pageNumber.toString());
