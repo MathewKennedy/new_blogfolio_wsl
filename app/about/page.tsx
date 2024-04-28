@@ -18,7 +18,21 @@ export default async function AboutPage(){
                     <AvatarImage src="/avatar.png" alt={siteConfig.author}></AvatarImage>
                     <AvatarFallback>MK</AvatarFallback>
                 </Avatar>
+                <h2 className="text-2xl font-bold text-center break-words mt-4">
+                    {siteConfig.author}
+                </h2>
+                <p className="text-muted-foreground text-center break-words">
+                    Software Engineer
+                </p>
             </div>
+            <p className="text-muted-foreground text-lg py-4">
+                I'm a passionate and creative full stack software developer. I love using my logical and creative sides together, 
+                and I jump easily between front end, back end, and different stacks due to a great grasp of fundamentals. 
+                I acquired a national diploma in IT in college, and found my love of programming making my own applications and 
+                games using many technologies, old and brand new. <br /> 
+                I graduated a full stack engineering traineeship in 2023, and I've been working at TAB on financial applications since. <br />
+                I'm currently studying web3 technologies. <br />
+            </p>
         </div>
     </div>
 }
