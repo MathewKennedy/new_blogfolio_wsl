@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Providers } from "@/components/providers";
 import { siteConfig } from "@/config/site";
 
@@ -43,6 +44,7 @@ export default function RootLayout({
             <main className="flex-1">
               {children}
             </main>
+            <SiteFooter />
           </div>
         </Providers>
       </body>
