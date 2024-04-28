@@ -1,9 +1,14 @@
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, sortPosts } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { PostItem } from "@/components/post-item";
 import { siteConfig } from "@/config/site";
+import { posts } from "#site/content";
 
 export default function Home() {
+
+  const latestPosts = sortPosts(posts).slice(0, 5);
+  
   return (
     <>
       <section className="space-y-6 pb-8 pt-6 md:pb-12 md:mt-10 lg:py-32">
@@ -28,6 +33,12 @@ export default function Home() {
         <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-center">
           Latest posts
         </h2>
+        <ul className="flex flex-col">
+          {latestPosts.map(post => (
+          <li key={post.slug} className="first:border-t first:border-border">
+              <PostItem slug={post.slug} title={post.title} description={post.description} date={post.date}/>
+          </li>))}
+        </ul>
       </section>
     </>
   );
