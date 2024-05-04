@@ -4,11 +4,26 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Tag } from "@/components/tag";
 import { PostItem } from "@/components/post-item";
 import { slug } from "github-slugger";
+import { Metadata } from "next";
 
 interface TagPageProps {
     params: {
         tag: string
     }
+}
+
+export async function generateMetaData({ params }: TagPageProps) : Promise<Metadata>{
+    const { tag } = params;
+    return {
+        title: tag,
+        description: `Posts on the topic of ${tag}.`
+    }
+}
+
+export const generateStaticParams = () => {
+    const tags = getAllTags(posts);
+    const paths = Object.keys(tags).map(tag => ({tag: slug(tag)}))
+    return paths;
 }
 
 export default function TagPage({ params } : TagPageProps){

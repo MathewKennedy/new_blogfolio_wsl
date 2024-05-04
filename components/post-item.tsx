@@ -19,7 +19,7 @@ export function PostItem({slug, title, description, date, tags} : PostItemProps)
         <article className="flex flex-col gap-2 border-border border-b py-3">
             <div>
                 <h2 className="text-2xl font-bold">
-                    <Link href={slug}>
+                    <Link href={"/" + slug}>
                         {title}
                     </Link>
                 </h2>
@@ -41,7 +41,7 @@ export function PostItem({slug, title, description, date, tags} : PostItemProps)
                         <time dateTime={date}>{formatDate(date)}</time>
                     </dd>
                 </dl>
-                <Link href={slug} className={cn(buttonVariants({variant: "link"}), "py-0")}>
+                <Link href={"/" + slug} className={cn(buttonVariants({variant: "link"}), "py-0")}>
                     Read more &rarr;
                 </Link>
             </div>
