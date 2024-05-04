@@ -22,3 +22,19 @@ export function sortPosts(posts: Array<Post>) : Array<Post> {
       return 0;
     })
 }
+
+export function getAllTags(posts: Array<Post>){
+  const tags: Record<string, number> = {};
+  posts.forEach((post) => {
+    post.tags?.forEach((tag) => {
+      // gets count of this tag - either adds 1 to existing amount or sets it to 0 plus one if it's the first of that tag
+      tags[tag] = (tags[tag] ?? 0) + 1;
+    })
+  })
+  return tags;
+}
+
+export function sortTagsByCount(tags: Record<string, number>){
+    return Object.keys(tags).sort((a, b) => tags[b] - tags[a]);
+}
+
