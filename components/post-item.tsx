@@ -6,14 +6,15 @@ import Link from "next/link";
 import { Tag } from "./tag";
 
 interface PostItemProps {
-    slug: string,
-    title: string,
-    description?: string,
-    date: string,
-    tags?: Array<string>
+    slug: string;
+    title: string;
+    description?: string;
+    date: string;
+    tags?: Array<string>;
 }
 
 export function PostItem({slug, title, description, date, tags} : PostItemProps){
+
     return (
         <article className="flex flex-col gap-2 border-border border-b py-3">
             <div>
