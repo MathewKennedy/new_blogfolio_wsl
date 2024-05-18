@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { Post } from "#site/content";
+import { Post, Project } from "#site/content";
 import { slug } from "github-slugger";
 
 export function cn(...inputs: ClassValue[]) {
@@ -24,11 +24,29 @@ export function sortPosts(posts: Array<Post>) : Array<Post> {
     })
 }
 
+export function sortProjects(projects: Array<Project>) : Array<Project> {
+  return projects.sort((a, b) => {
+    if(a.date > b.date) return -1;
+    if(a.date < b.date) return 1;
+    return 0;
+  })
+}
+
 export function getAllTags(posts: Array<Post>){
   const tags: Record<string, number> = {};
   posts.forEach((post) => {
     post.tags?.forEach((tag) => {
       // gets count of this tag - either adds 1 to existing amount or sets it to 0 plus one if it's the first of that tag
+      tags[tag] = (tags[tag] ?? 0) + 1;
+    })
+  })
+  return tags;
+}
+
+export function getAllProjectTags(projects: Array<Project>){
+  const tags: Record<string, number> = {};
+  projects.forEach((project) => {
+    project.tags?.forEach((tag) => {
       tags[tag] = (tags[tag] ?? 0) + 1;
     })
   })

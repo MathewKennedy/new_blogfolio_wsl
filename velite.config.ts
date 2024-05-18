@@ -19,6 +19,7 @@ const computedFields = <T extends {slug:string}>(data: T) => ({
     slugAsParams: data.slug.split("/").slice(1).join("/")
 });
 
+// defining the path to post markdown files and the schema for it so velite can compile them to .velite/posts.json
 const posts = defineCollection({
   name: "Post",
   pattern: "blog/**/*.mdx",
@@ -33,6 +34,22 @@ const posts = defineCollection({
   })
   .transform(computedFields)
 })
+
+// defining the path to post markdown files and the schema for it so velite can compile them to .velite/posts.json
+const projects = defineCollection({
+    name: "Project",
+    pattern: "projects/**/*.mdx",
+    schema: s.object({
+      slug: s.path(),
+      title: s.string().max(99),
+      description: s.string().max(999).optional(),
+      date: s.isodate(),
+      published: s.boolean().default(true),
+      tags: s.array(s.string()).optional(),
+      body: s.mdx()
+    })
+    .transform(computedFields)
+  })
 
 // above, .transform is chained on the return value of s.object()
 // it's a function to pass the result of s.object() to
@@ -49,7 +66,8 @@ export default defineConfig({
         clean: true
     },
     collections: {
-        posts
+        posts,
+        projects
     },
     mdx: {
         rehypePlugins: [
