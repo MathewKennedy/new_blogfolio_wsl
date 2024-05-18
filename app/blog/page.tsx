@@ -1,7 +1,7 @@
 import React from "react";
 import { posts } from "#site/content";
 import { PostItem } from "@/components/post-item";
-import { getAllTags, sortPosts, sortTagsByCount } from "@/lib/utils";
+import { cn, getAllTags, sortPosts, sortTagsByCount } from "@/lib/utils";
 import { QueryPagination } from "@/components/query-pagination";
 import { Metadata } from "next";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -68,7 +68,7 @@ export default async function BlogPage({ searchParams } : BlogPageProps){
                         className="justify-end mt-4"
                     />
                 </div>
-                <Card className="col-span-12 row-start-3 h-fit sm:col-span-4 sm:col-start-9 sm:row-start-1">
+                <Card className={cn("col-span-12 row-start-3 h-fit sm:col-span-4 sm:col-start-9 sm:row-start-1", "-border", "-shadow")}>
                     <CardHeader>
                         <CardTitle>
                             Tags

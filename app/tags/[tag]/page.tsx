@@ -1,4 +1,4 @@
-import { getPostsByTagSlug, getAllTags, sortTagsByCount } from "@/lib/utils";
+import { getPostsByTagSlug, getAllTags, sortTagsByCount, cn } from "@/lib/utils";
 import { posts } from "#site/content"
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Tag } from "@/components/tag";
@@ -62,7 +62,7 @@ export default function TagPage({ params } : TagPageProps){
                     )}
                 
                 </div>
-                <Card className="col-span-12 row-start-3 h-fit sm:col-span-4 sm:col-start-9 sm:row-start-1">
+                <Card className={cn("col-span-12 row-start-3 h-fit sm:col-span-4 sm:col-start-9 sm:row-start-1", "-border", "-shadow")}>
                     <CardHeader>
                         <CardTitle>
                             Tags
