@@ -8,12 +8,20 @@ interface TagProps {
     tag: string;
     current?: boolean;
     count?: number;
+    type: string;
 }
 
-export function Tag({ tag, current, count} : TagProps){
+export function Tag({ tag, current, count, type} : TagProps){
+    // check if tag type is project or blog
+    // if it's project, the href should be prepended with /project-tags/, if it's blog, it's prepended with /tags/
+    // also handle badge variants based on this - pink for projects, tealish for blogs
+    let pathPrefix = type == "post" ? "/tags/" : "/project-tags/";
+
+
+
     return (
         <Link 
-            href={`/tags/${slug(tag)}`}
+            href={`${pathPrefix}${slug(tag)}`}
             className={badgeVariants({ variant: current ? "default" : "secondary", className: "no-underline" })}
         >
             {tag} {count ? `(${count})` : null}

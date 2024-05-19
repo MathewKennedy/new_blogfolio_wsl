@@ -74,7 +74,7 @@ export default async function ProjectPage({ searchParams } : ProjectPageProps){
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-wrap gap-2">
-                        {sortedProjectTags?.map((tag) => <Tag tag={tag} key={tag} count={tags[tag]}/> )}
+                        {sortedProjectTags?.map((tag) => <Tag tag={tag} key={tag} count={tags[tag]} type="project"/> )}
                     </CardContent>
                 </Card>
             </div>

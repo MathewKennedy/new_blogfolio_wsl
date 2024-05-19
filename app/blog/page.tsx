@@ -75,7 +75,7 @@ export default async function BlogPage({ searchParams } : BlogPageProps){
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-wrap gap-2">
-                        {sortedTags?.map((tag) => <Tag tag={tag} key={tag} count={tags[tag]}/> )}
+                        {sortedTags?.map((tag) => <Tag tag={tag} key={tag} type="post" count={tags[tag]}/> )}
                     </CardContent>
                 </Card>
             </div>

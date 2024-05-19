@@ -1,40 +1,40 @@
-import { getPostsByTagSlug, getAllTags, sortTagsByCount, cn } from "@/lib/utils";
-import { posts } from "#site/content"
+import { getProjectsByTagSlug, getAllTags, sortTagsByCount, cn } from "@/lib/utils";
+import { projects } from "#site/content"
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Tag } from "@/components/tag";
-import { PostItem } from "@/components/post-item";
+import { ProjectItem } from "@/components/project-item";
 import { slug } from "github-slugger";
 import { Metadata } from "next";
 
-interface TagPageProps {
+interface ProjectTagPageProps {
     params: {
         tag: string
     }
 }
 
-export async function generateMetaData({ params }: TagPageProps) : Promise<Metadata>{
+export async function generateMetaData({ params }: ProjectTagPageProps) : Promise<Metadata>{
     const { tag } = params;
     return {
         title: tag,
-        description: `Posts on the topic of ${tag}.`
+        description: `Projects related to ${tag}.`
     }
 }
 
 export const generateStaticParams = () => {
-    const tags = getAllTags(posts);
+    const tags = getAllTags(projects);
     const paths = Object.keys(tags).map(tag => ({tag: slug(tag)}))
     return paths;
 }
 
-export default function TagPage({ params } : TagPageProps){
+export default function TagPage({ params } : ProjectTagPageProps){
 
     const { tag } = params;
     const title = tag.split('-').join(' ');
 
-    const tags = getAllTags(posts);
+    const tags = getAllTags(projects);
     const sortedTags = sortTagsByCount(tags)
     
-    const displayPosts = getPostsByTagSlug(posts, tag);
+    const displayPosts = getProjectsByTagSlug(projects, tag);
 
     return (
         <div className="container max-w-4xl py-6 lg:py-10">
@@ -52,7 +52,7 @@ export default function TagPage({ params } : TagPageProps){
                                 const { slug, date, title, description, tags } = post;
                                 return (
                                     <li key={slug}>
-                                        <PostItem slug={slug} date={date} title={title} description={description} tags={tags} />
+                                        <ProjectItem slug={slug} date={date} title={title} description={description} tags={tags} />
                                     </li>
                                 )
                             })}
@@ -69,7 +69,7 @@ export default function TagPage({ params } : TagPageProps){
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-wrap gap-2">
-                        {sortedTags?.map((t) => <Tag tag={t} key={t} count={tags[t]} type="post" current={slug(t) === tag}/> )}
+                        {sortedTags?.map((t) => <Tag tag={t} key={t} count={tags[t]} type="project" current={slug(t) === tag}/> )}
                     </CardContent>
                 </Card>
             </div>

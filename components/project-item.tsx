@@ -26,7 +26,7 @@ export function ProjectItem({slug, title, description, date, tags} : ProjectItem
             <CardContent>
                 <div className="flex gap-2 ">
                     {tags?.map((tag) => (
-                        <Tag tag={tag} key={tag}/>
+                        <Tag tag={tag} key={tag} type="project"/>
                         )
                     )}
                 </div>

@@ -65,4 +65,14 @@ export function getPostsByTagSlug(posts: Array<Post>, tag: string){
     const slugifiedTags = post.tags.map(tag => slug(tag))
     return slugifiedTags.includes(tag);
   })
+}
+
+export function getProjectsByTagSlug(projects: Array<Project>, tag: string){
+  return projects.filter((project) => {
+    if(!project.tags){
+        return false;
+    }
+    const slugifiedTags = project.tags.map(tag => slug(tag))
+    return slugifiedTags.includes(tag);
+  })
 } 
