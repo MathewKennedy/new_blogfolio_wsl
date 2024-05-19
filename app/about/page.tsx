@@ -19,6 +19,7 @@ export default async function AboutPage(){
             </div>
         </div>
         <hr className="my-8" />
+        {/* picture and about me */}
         <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
             <div className="min-w-48 max-w-48 flex-col gap-2">
                 <Avatar className="h-48 w-48">
@@ -40,6 +41,15 @@ export default async function AboutPage(){
                 I graduated a full stack engineering traineeship in 2023, and I've been working at TAB on financial applications since. <br />
                 I'm currently studying web3 technologies. <br />
             </p>
+        </div>
+        {/* awards */}
+        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
+        <p className="text-muted-foreground text-lg py-4">
+                Writing and award logos here.
+            </p>
+            <div className="min-w-48 max-w-48 flex-col gap-2">
+                <img src="/awards.png" alt="An image of the TAB HQ Tech Team at the Property Reporter Awards 2024 and UK PropTech Awards 2023." />
+            </div>
         </div>
     </div>
 }
