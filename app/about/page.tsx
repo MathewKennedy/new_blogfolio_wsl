@@ -20,7 +20,7 @@ export default async function AboutPage(){
         </div>
         <hr className="my-8" />
         {/* picture and about me */}
-        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
+        <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="min-w-48 max-w-48 flex-col gap-2">
                 <Avatar className="h-48 w-48">
                     <AvatarImage src="/avatar.png" alt={siteConfig.author}></AvatarImage>
@@ -43,11 +43,12 @@ export default async function AboutPage(){
             </p>
         </div>
         {/* awards */}
-        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-        <p className="text-muted-foreground text-lg py-4">
-                Writing and award logos here.
+        <div className="flex flex-col-reverse md:flex-row gap-8 items-center mt-8">
+            <p className="text-muted-foreground text-lg py-4">
+                I'm really proud that our small team of five was shortlisted for the "Scaling at Pace" award in the 2023 UK PropTech Awards.
+                Shortly after, we were also finalists for "The Best Proptech Company" at the Property Reporter Awards 2024! 🏆
             </p>
-            <div className="min-w-48 max-w-48 flex-col gap-2">
+            <div className="min-w-[205px] max-w-[205px] flex-col gap-2">
                 <img src="/awards.png" alt="An image of the TAB HQ Tech Team at the Property Reporter Awards 2024 and UK PropTech Awards 2023." />
             </div>
         </div>
