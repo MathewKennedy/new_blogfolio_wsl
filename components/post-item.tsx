@@ -26,7 +26,7 @@ export function PostItem({slug, title, description, date, tags} : PostItemProps)
             </div>
             <div className="flex gap-2 ">
                 {tags?.map((tag) => (
-                    <Tag tag={tag} key={tag}/>
+                    <Tag type="post" tag={tag} key={tag}/>
                     )
                 )}
             </div>
