@@ -60,7 +60,7 @@ export function ProjectItem({slug, title, description, date, tags} : ProjectItem
                 </h5>
                 <div className="flex gap-2 mb-3">
                     {tags?.map((tag) => (
-                            <Tag tag={tag} key={tag} type="project"/>
+                            <Tag tag={tag} key={tag} type="project-item"/>
                         )
                     )}
                 </div>
