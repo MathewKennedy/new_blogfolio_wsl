@@ -50,7 +50,7 @@ export function ProjectItem({slug, title, description, date, tags} : ProjectItem
 
         <div className="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <Link href={"/" + slug}>
-                <img className="rounded-t-lg" src="/novel.png" alt="A screenshot of the homepage of Nov3l, the web3 library." />
+                <img className="rounded-t-lg" src="/novel/novel.png" alt="A screenshot of the homepage of Nov3l, the web3 library." />
             </Link>
             <div className="p-5">
                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
