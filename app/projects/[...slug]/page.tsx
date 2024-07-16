@@ -85,6 +85,17 @@ export default async function PostPage({ params } : ProjectPageProps){
             </div>
             { project.description ? (<p className="text-xl mt-0 text-muted-foreground">{project.description}</p>) : null}
             <hr className="my-4"/>
+            <div id="phone-outer-container">
+                <div id="image-container">
+                    <div id="phone-depth"></div>
+                    <div id="phone">
+                    <div id="phone-screen">
+                        <div className="shine"></div>
+                    </div>
+                    <div id="phone-button"></div>
+                    </div>
+                </div>
+            </div>
             <MDXContent code={project.body} />
         </article>
     )
