@@ -7,7 +7,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 // the generic type used must extend an object with a slug property set to a string type
 
 // example of extends being used:
-// const y: object & { slug: string } = s; // error
+// const y: object & { slug: string } = something; // error
 // const z: object & { slug: string } = { slug: "hello" }; // okay
 
 // it takes in a data argument of generic type T
