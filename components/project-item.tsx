@@ -50,12 +50,12 @@ export function ProjectItem({slug, title, description, projectImage, date, tags}
         // </Card>
 
         <div className="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-4">
-            <div className="h-[20rem] overflow-hidden">
+            <div className="overflow-hidden">
                 <Link href={"/" + slug}>
                     <img className="rounded-t-lg w-full" src={projectImage} alt={`A screenshot of the ${title} project.`} />
                 </Link>
             </div>
-            <div className="p-5 relative">
+            <div className="p-5">
                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                     <Link href={"/" + slug}>
                         {title}
@@ -76,7 +76,7 @@ export function ProjectItem({slug, title, description, projectImage, date, tags}
                             <time dateTime={date}>{formatDate(date)}</time>
                         </dd>
                     </dl>
-                    <Link href={"/" + slug} className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-fuchsia-400 rounded-lg hover:fuchsia-500 focus:ring-4 focus:outline-none focus:ring-fuchsia-300 dark:bg-fuchsia-500 dark:hover:bg-fuchsia-500 dark:focus:ring-fuchsia-700">
+                    <Link href={"/" + slug} className="inline-flex items-center px-3 py-2 text-sm font-medium text-center darl:text-white bg-[#ffa1d0] rounded-lg hover:bg-[#ffb2e1] focus:ring-4 focus:outline-none focus:ring-fuchsia-300 dark:bg-[#942e53] dark:hover:bg-[#a53f64] dark:focus:ring-white">
                         Read more &rarr;
                     </Link>
                  </div>

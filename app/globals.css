@@ -89,7 +89,7 @@
   place-items: center;
   width: auto;
   height: auto;
-  margin: 1rem auto;
+  margin: 3rem auto;
 }
 
 #phone-depth {
@@ -124,7 +124,7 @@
   width: 6rem;
   overflow: hidden;
   border-radius: 0.6rem;
-  background-image: url("/novel/novel_mobile.png");
+  background-image: url("/novel/animated_mobile.png");
   background-position: top;
   background-size: 100%;
   background-repeat: no-repeat;
@@ -224,5 +224,11 @@
   }
   100% {
     background-position: bottom;
+  }
+}
+
+@media only screen and (min-width: 768px){
+  #image-container {
+    margin: 1rem auto;
   }
 }

@@ -48,10 +48,10 @@ export default function TagPage({ params } : ProjectTagPageProps){
                     {displayPosts?.length > 0 ? (
                         <ul className="flex flex-col">
                             {displayPosts.map((post) => {
-                                const { slug, date, title, description, tags } = post;
+                                const { slug, date, title, description, project_image, tags } = post;
                                 return (
                                     <li key={slug}>
-                                        <ProjectItem slug={slug} date={date} title={title} description={description} tags={tags} />
+                                        <ProjectItem slug={slug} date={date} title={title} description={description} projectImage={project_image} tags={tags} />
                                     </li>
                                 )
                             })}
@@ -68,7 +68,7 @@ export default function TagPage({ params } : ProjectTagPageProps){
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-wrap gap-2">
-                        {sortedTags?.map((t) => <Tag tag={t} key={t} count={tags[t]} type="project" current={slug(t) === tag}/> )}
+                        {sortedTags?.map((t) => <Tag tag={t} key={t} count={tags[t]} type="project-item" current={slug(t) === tag}/> )}
                     </CardContent>
                 </Card>
             </div>

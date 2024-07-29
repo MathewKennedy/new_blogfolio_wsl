@@ -14,11 +14,11 @@ export default function Home() {
       <section className="space-y-6 pb-8 pt-6 md:pb-12 md:mt-10 lg:py-32">
         <div className="container flex flex-col gap-4 text-center">
           <div className="flex flex-row justify-center">
-            <h1 className="py-2 text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-balance bg-clip-text text-transparent bg-gradient-to-r from-[#96fffa] to-[#faacd4]">
+            <h1 className="py-2 text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-balance bg-clip-text text-transparent bg-gradient-to-r from-[#2e8694] to-[#942e53] dark:from-[#96fffa] dark:to-[#faacd4]">
               blogfolio
             </h1>
           </div>
-          <p className="max-w-[42rem] mx-auto text-muted-foreground sm:text-xl text-balance">
+          <p className="max-w-[42rem] mx-auto text-muted-foreground sm:text-xl text-balance mb-[1rem]">
             Mathew Kennedy
           </p>
           <div className="flex flex-col gap-4 justify-center sm:flex-row">
