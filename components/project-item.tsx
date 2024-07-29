@@ -10,11 +10,12 @@ interface ProjectItemProps {
     slug: string;
     title: string;
     description?: string;
+    projectImage: string;
     date: string;
     tags?: Array<string>;
 }
 
-export function ProjectItem({slug, title, description, date, tags} : ProjectItemProps){
+export function ProjectItem({slug, title, description, projectImage, date, tags} : ProjectItemProps){
 
     return (
         // <Card>
@@ -48,11 +49,13 @@ export function ProjectItem({slug, title, description, date, tags} : ProjectItem
         //     </CardContent>
         // </Card>
 
-        <div className="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-            <Link href={"/" + slug}>
-                <img className="rounded-t-lg" src="/novel/novel.png" alt="A screenshot of the homepage of Nov3l, the web3 library." />
-            </Link>
-            <div className="p-5">
+        <div className="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-4">
+            <div className="h-[20rem] overflow-hidden">
+                <Link href={"/" + slug}>
+                    <img className="rounded-t-lg w-full" src={projectImage} alt={`A screenshot of the ${title} project.`} />
+                </Link>
+            </div>
+            <div className="p-5 relative">
                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                     <Link href={"/" + slug}>
                         {title}

@@ -51,10 +51,10 @@ export default async function ProjectPage({ searchParams } : ProjectPageProps){
                     {displayProjects?.length > 0 ? (
                         <ul className="flex flex-col">
                             {displayProjects.map((project) => {
-                                const { slug, date, title, description, tags } = project;
+                                const { slug, date, title, description, project_image, tags } = project;
                                 return (
                                     <li key={slug}>
-                                        <ProjectItem slug={slug} date={date} title={title} description={description} tags={tags} />
+                                        <ProjectItem slug={slug} date={date} title={title} description={description} projectImage={project_image} tags={tags} />
                                     </li>
                                 )
                             })}
