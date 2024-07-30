@@ -232,3 +232,22 @@
     margin: 1rem auto;
   }
 }
+
+/* rehype colors */
+/* pink code highlight */
+[data-chars-id="p"] {
+  /* background-color: #BB33BB22 !important; */
+  border-color: hotpink;
+}
+
+/* blue code highlight */
+[data-chars-id="b"] {
+  /* background-color: #5555FF22 !important; */
+  border-color: skyblue;
+}
+
+/* green code highlight */
+[data-chars-id="y"] {
+  /* background-color: #BB990022 !important; */
+  border-color: bisque;
+}
