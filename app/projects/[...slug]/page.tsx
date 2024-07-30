@@ -79,7 +79,7 @@ export default async function PostPage({ params } : ProjectPageProps){
             <div className="flex gap-2 mb-2">
                 {
                     project.tags?.map((tag) => (
-                        <Tag tag={tag} key={tag} type="project" />
+                        <Tag tag={tag} key={tag} type="project-item" />
                     ))
                 }
             </div>
