@@ -42,7 +42,7 @@ export default async function BlogPage({ searchParams } : BlogPageProps){
                 <div className="flex-1 space-y-4">
                     <h1 className="inline-block font-black text-4xl lg:text-5xl">Blog</h1>
                     <p className="text-xl text-muted-foreground">
-                        Logging my software projects, learning, and thoughts.
+                        Logging my software engineering learning.
                     </p>
                 </div>
             </div>

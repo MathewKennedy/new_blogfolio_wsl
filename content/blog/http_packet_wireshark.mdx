@@ -1,0 +1,171 @@
+---
+title: Ethernet Frame - Wireshark Examination
+description: Using Wireshark to examine and understand a single Ethernet frame from a HTTP request
+date: 2024-03-04
+tags: ["networking", "wireshark", "http"]
+published: true
+---
+
+🦈 [Wireshark](https://www.wireshark.org/about.html) is a network protocol analyser for macOS, Linux, and Windows. You can learn how to use Wireshark at [Wireshark Learn](https://www.wireshark.org/learn). This post aims to explain in its entirety a single Ethernet II frame capture containing the SYN packet of an HTTP request.
+
+### The Binary Dump
+
+```yaml /10001100 11100101 11101111 10000001 11010000 00011010 11110000 01010111/#b /10100110 10011010 11000111 10110110 00001000 00000000/#b /01000101 00000000/#p /00000000 00110100 01011010 00101001 01000000 00000000 10000000 00000110/#p /00000000 00000000 11000000 10101000 00000001 00011110 00100011 10110010/#p /11000010 01001110/#p /11101000 00011111 00000001 10111011 11101101 10001100/#y /01100101 11111011 00000000 00000000 00000000 00000000 10000000 00000010/#y /11111010 11110000 10100111 11101101 00000000 00000000 00000010 00000100/#y /00000101 10110100 00000001 00000011 00000011 00001000 00000001 00000001/#y /00000100 00000010/#y
+0000  10001100 11100101 11101111 10000001 11010000 00011010 11110000 01010111 
+0008  10100110 10011010 11000111 10110110 00001000 0000000001000101 00000000
+0010  00000000 00110100 01011010 00101001 01000000 00000000 10000000 00000110 
+0018  00000000 00000000 11000000 10101000 00000001 00011110 00100011 10110010
+0020  11000010 0100111011101000 00011111 00000001 10111011 11101101 10001100
+0028  01100101 11111011 00000000 00000000 00000000 00000000 10000000 00000010
+0030  11111010 11110000 10100111 11101101 00000000 00000000 00000010 00000100
+0038  00000101 10110100 00000001 00000011 00000011 00001000 00000001 00000001
+0040  00000100 00000010
+•
+```
+
+<small className="dark:text-[skyblue] text-[#2233aa]">Note: code blocks scroll horizontally on smaller screens.</small>
+
+Above, we're looking at the binary dump for this particular frame. These are the 0s and 1s that are encoded as high and low voltage signals in wired connections, light pulses in fiber optic cables, and varying amplitude electromagnetic waves in wireless communications. 
+  
+Let's understand this dump first, starting with the four digit numbers on the left. These numbers are called <strong>offsets</strong>. They're added by Wireshark for our reference and are not actually sent in frames.
+
+Offsets are hexadecimal numbers that tell us how many bytes the current line is offset into the frame. For example, the third line of binary is offset 16 bytes into the frame, so the offset is 0010 (16 in hexadecimal).
+
+Following each offset, you can see 8 bytes in binary. I've applied color-coded underlines to these bytes to distinguish them by their respective network layers and associated protocols.
+
+```yaml /Layer 2 Ethernet II bytes/#b /Layer 3 IPv4 bytes/#p /Layer 4 TCP bytes/#y
+Layer 2 Ethernet II bytes Layer 3 IPv4 bytes Layer 4 TCP bytes
+```
+
+Wireshark uses highlighting to differentiate layers and protocols in this way.
+
+Let's look at the equivalent hexadecimal dump before examining each layer of the frame.
+
+### The Hexadecimal Dump
+
+```yaml /8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00/#b /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p /e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02/#y /fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01/#y /04 02/#y
+0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 0045 00   .......W......E.
+0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
+0020   c2 4ee8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
+0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01   ................
+0040   04 02                                             ..
+```
+
+Now, we're looking at the hexadecimal dump of the same frame.
+
+The four digit numbers on the left are again the offsets of each line. Because the actual data is now displayed in hexadecimal, twice as many bytes fit on a single line. Consequenty, you can see the offsets increment by 16 bytes instead of 8 bytes: 0010 (16), 0020 (32), 0030 (48), and so on.
+
+At the end of each row in this dump, we can see the corresponding ASCII characters for the bytes in that row, if they're printable. This is to allow us to quickly see any readable text in a packet. SYN packets don't generally contain readable text, but take a look at the ASCII from a later packet:
+
+```yaml /www.mathewk/ /ennedy.com/ /77 77 77 2e 6d 61 74 68 65 77 6b/ /65 6e 6e 65 64 79 2e 63 6f 6d/
+06d0   17 00 2b 00 07 06 5a 5a 03 04 03 03 00 00 00 1a   ..+...ZZ........
+06e0   00 18 00 00 15 77 77 77 2e 6d 61 74 68 65 77 6b   .....www.mathewk
+06f0   65 6e 6e 65 64 79 2e 63 6f 6d 44 69 00 05 00 03   ennedy.comDi....
+0700   02 68 32 00 12 00 00 00 05 00 05 01 00 00 00 00   .h2.............
+```
+The ASCII makes it a lot easier to identify certain parts of the packet, such as the server_name extension in the client hello above.
+
+Note that the ASCII characters are also included in the binary dump in Wireshark, but there's more space to examine them here.
+
+We're going to use two of Wireshark's panels to help us understand the content of each layer. In the <span className="text-[navy] dark:text-[skyblue]">packet detail</span> panel, Wireshark adds labels and looks up or infers more information for us using protocol standards. The <span className="dark:text-[bisque] text-[brown]">packet diagram</span> panel gives a visual layout of bytes.
+
+### Ethernet II Frame (Layer 2)
+
+These are the 14 bytes in the layer 2 header of our original frame:
+
+```yaml /8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00/#b /.......W....../#b
+0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 0045 00   .......W......E.
+```
+
+The packet diagram for layer 2 shows us what's in each byte:
+
+![`An ethernet header packet diagram`](/images/blog/http_packet_wireshark/ethernet_packet_diagram.png)
+
+The diagram is 32 bits (4 bytes) wide, zero-indexed. We can see from the rows that the frame contains:
+- The destination MAC address (6 bytes)
+- The source MAC address (6 bytes)
+- The EtherType (2 bytes)
+
+Here's how the packet detail panel displays this information:
+
+```yaml
+Ethernet II, Src: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa), Dst: HuaweiTe_80:a0:1a (8a:a5:aa:80:a0:1a)
+    Destination: HuaweiTe_80:a0:1a (8a:a5:aa:80:a0:1a)
+        Address: HuaweiTe_80:a0:1a (8a:a5:aa:80:a0:1a)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa)
+        Address: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+```
+MAC addresses are assigned to a Network Interface Controller (NIC) to give a device a unique address within a network. They facilitate the "hop-by-hop" communication between the two devices a frame is currently being passed to and from. In this case the destination MAC address belongs to a NIC in my home router, and the source MAC address belongs to a NIC in my computer.
+
+<small className="dark:text-[skyblue] text-[#2233aa]">MAC addresses have been altered in this post.</small>
+
+The LG (Local/Global) bit is the second least significant bit (second from the right) of the first byte of the MAC address. It indicates whether the MAC address is locally administered (1) or globally unique (0). In this case both MAC addresses are globally unique.
+
+The IG (Individual/Group) bit is the least significant bit (first on the right) of the first byte of the MAC address. It indicates whether the MAC address is an individual (unicast) address (0) or a group (multicast/broadcast) address (1). In this case both MAC addresses are unicast.
+
+Wireshark displays the LG and IG bits visually using periods as bits in the first three bytes of the addresses.
+
+The "HuaweiTe_" and "IntelCor_" prefixes are found by Wireshark in [Wireshark's Manufacturer Database](https://www.wireshark.org/tools/oui-lookup.html) using the first three bytes in each of the MAC addresses. These first three bytes are the OUI (Organisational Unique Identifier) of any given MAC address, assigned to manufacturers by the [IEEE](https://standards.ieee.org/).
+
+Let's move on to examine the layer 3 IP packet in this frame.
+
+### IP Packet (Layer 3)
+
+These are the 20 bytes in the layer 3 header of our original frame:
+
+```yaml /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p
+0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00 45 00   .......W......E.
+0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
+0020   c2 4ee8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
+```
+Again, let's consult Wireshark's packet diagram for layer 3 to see what it should contain.
+
+![`An IP header packet diagram`](/images/blog/http_packet_wireshark/ip_packet_diagram.png)
+
+This packet contains:
+- IP version and header length (1 byte)
+- Differentiated Services (1 byte)
+- Total length (2 bytes)
+- Identification (2 bytes)
+- Flags (3 bits)
+- Fragment Offset (1 byte and 5 bits)
+- Time to Live (1 byte)
+- Protocol (1 byte)
+- Header Checksum (2 bytes)
+- Source IP address (4 bytes)
+- Destination IP address (4 bytes)
+
+Here's how the packet details panel displays the packet:
+
+```yaml
+Internet Protocol Version 4, Src: 192.168.1.30, Dst: 35.178.194.78
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 52
+    Identification: 0x5a29 (23081)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.1.30
+    Destination Address: 35.178.194.78
+```
+
+Like with the LG bit and IG bit in the layer 2 frame, Wireshark again uses periods, 1s and 0s to indicate which bits the human-readable information pertains to.
+
+
+
+This was just a single frame containing a SYN packet from a HTTP request. For a look at the whole TLS 1.2 handshake, see my post [The TLS 1.2 Handshake in Depth](/blog/tls_handshake_in_depth).
