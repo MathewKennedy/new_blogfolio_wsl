@@ -6,7 +6,7 @@ tags: ["networking", "wireshark"]
 published: true
 ---
 
-🦈 [Wireshark](https://www.wireshark.org/about.html) is a network protocol analyser for macOS, Linux, and Windows. You can learn how to use Wireshark at [Wireshark Learn](https://www.wireshark.org/learn). This post aims to explain in its entirety a single Ethernet II frame capture containing the SYN packet of an HTTP request.
+🦈 [Wireshark](https://www.wireshark.org/about.html) is a network protocol analyser for macOS, Linux, and Windows. You can learn how to use Wireshark at [Wireshark Learn](https://www.wireshark.org/learn). This post aims to explain in its entirety a single Ethernet II frame capture containing a SYN packet.
 
 ## The Binary Dump
 
@@ -26,9 +26,9 @@ published: true
 
 Above, we're looking at the binary dump for this particular frame. These are the 0s and 1s that are encoded as high and low voltage signals in wired connections, light pulses in fiber optic cables, and the modulation of electromagnetic waves in wireless communications.
   
-Let's understand this dump first, starting with the four digit numbers on the left. These numbers are called <strong>offsets</strong>. They're added by Wireshark for our reference and are not actually sent in frames.
+Let's understand this dump first, starting with the four digit numbers on the left. These numbers are called <strong>offsets</strong>. They're added by Wireshark for our reference and are not actually contained in Ethernet frames.
 
-Offsets are hexadecimal numbers that tell us how many bytes the current line is offset into the frame. For example, the third line of binary is offset 16 bytes into the frame, so the offset is 0010 (16 in hexadecimal).
+Offsets are hexadecimal numbers that tell us how many bytes the current line is offset from the beginning of the frame. For example, the third line of binary is offset 16 bytes into the frame, so the offset is 0010 (16 in hexadecimal).
 
 Following each offset, you can see 8 bytes in binary. I've applied color-coded underlines to these bytes to distinguish them by their respective network layers and associated protocols.
 
@@ -68,15 +68,15 @@ Note that the ASCII characters are also included in the binary dump in Wireshark
 
 We're going to use two of Wireshark's panels to help us understand the content of each layer. In the <span className="text-[navy] dark:text-[skyblue]">packet detail</span> panel, Wireshark adds labels and looks up or infers more information for us using protocol standards. The <span className="dark:text-[bisque] text-[brown]">packet diagram</span> panel gives a visual layout of bytes.
 
-## Ethernet II Frame (Layer 2)
+## Ethernet II Header (Layer 2)
 
-These are the 14 bytes in the layer 2 header of our original frame:
+These are the 14 bytes in the Ethernet II header of our original frame:
 
 ```yaml /8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00/#b /.......W....../#b
 0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 0045 00   .......W......E.
 ```
 
-The packet diagram for layer 2 shows us what's in each byte:
+The packet diagram for Ethernet shows us what's in each byte:
 
 ![`An ethernet header packet diagram`](/images/blog/http_packet_wireshark/ethernet_packet_diagram.png)
 
@@ -102,33 +102,39 @@ Ethernet II, Src: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa), Dst: HuaweiTe_80:a0:1a 
 <h3 className="text-[navy] dark:text-[skyblue]">Destination and Source MAC Addresses</h3>
 MAC addresses are assigned to a Network Interface Controller (NIC) to give a device a unique address within a network. They facilitate the "hop-by-hop" communication between the two devices a frame is currently being passed to and from. In this case the destination MAC address belongs to a NIC in my home router, and the source MAC address belongs to a NIC in my computer.
 
-<small className="dark:text-[pink] text-[darkred]">MAC addresses have been altered in this post.</small>
+Devices can have multiple network interface controllers, some physical and some virtual, each with their own MAC address, meaning a single device often uses multiple MAC addresses for network communications. For example, your computer might have different NICs for WiFi, wired Ethernet, Bluetooth, and virtual private network (VPN) connections.
+
+See my post on [How Routers Communicate](/blog/how_routers_communicate) for way more detail.
 
 <h3 className="text-[navy] dark:text-[skyblue]">LG / IG Bits</h3>
-The LG (Local/Global) bit is the second least significant bit (second from the right) of the first byte of the MAC address. It indicates whether the MAC address is locally administered (1) or globally unique (0). In this case both MAC addresses are globally unique.
+The LG (Local/Global) bit is the second least significant bit (the second bit from the right) of the most significant byte (the first byte on the left) of the MAC address. It indicates whether the MAC address is locally administered (1) or globally unique (0). In this case both MAC addresses are globally unique.
 
-The IG (Individual/Group) bit is the least significant bit (first on the right) of the first byte of the MAC address. It indicates whether the MAC address is an individual (unicast) address (0) or a group (multicast/broadcast) address (1). In this case both MAC addresses are unicast.
+-- difference / example of local / global --
+
+The IG (Individual/Group) bit is the least significant bit (the first bit on the right) of the most significant byte of the MAC address. It indicates whether the MAC address is an individual (unicast) address (0) or a group (multicast/broadcast) address (1). In this case both MAC addresses are unicast.
+
+-- difference / example of unicast/mutlicast/broadcst --
 
 Wireshark displays the LG and IG bits visually using periods as the surrounding bits before the human-readable information.
 
 <h3 className="text-[navy] dark:text-[skyblue]">OUI Bytes</h3>
-The "HuaweiTe_" and "IntelCor_" prefixes are found by Wireshark in [Wireshark's Manufacturer Database](https://www.wireshark.org/tools/oui-lookup.html) using the first three bytes in each of the MAC addresses. These first three bytes are the OUI (Organisational Unique Identifier) of any given MAC address, assigned to manufacturers by the [IEEE](https://standards.ieee.org/).
+The "HuaweiTe_" and "IntelCor_" prefixes are found by Wireshark in [Wireshark's Manufacturer Database](https://www.wireshark.org/tools/oui-lookup.html) using the first, second, and third most significant bytes (the three left-most bytes) in each of the MAC addresses. These three bytes are the OUI (Organisational Unique Identifier) of any given MAC address, assigned to manufacturers by the [IEEE](https://standards.ieee.org/).
 
 <h3 className="text-[navy] dark:text-[skyblue]">EtherType</h3>
 Type, or EtherType, indicates which protocol is encapsulated within this Ethernet frame. In this case it's IPv4.
 
-Let's move on to examine that layer 3 IPv4 packet.
+Let's move on to examine that layer 3 IPv4 header.
 
-## IP Packet (Layer 3)
+## IP Header (Layer 3)
 
-These are the 20 bytes in the layer 3 header of our original frame:
+These are the 20 bytes in the IP header of our original frame:
 
 ```yaml /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p
 0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00 45 00   .......W......E.
 0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
 0020   c2 4ee8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
 ```
-Again, let's consult Wireshark's packet diagram for layer 3 to see what it should contain.
+Again, let's consult Wireshark's packet diagram for IPv4 to see what it contains.
 
 ![`An IP header packet diagram`](/images/blog/http_packet_wireshark/ip_packet_diagram.png)
 
@@ -172,14 +178,14 @@ Internet Protocol Version 4, Src: 192.168.1.30, Dst: 35.178.194.78
 Like with the LG bit and IG bit in the layer 2 frame, Wireshark again uses periods, 1s, and 0s to indicate which bits the human-readable information pertains to.
 
 <h3 className="text-[navy] dark:text-[skyblue]">IP Version and Header Length</h3>
-We're using IP version 4 and the length of this IP header is 20 bytes. The 20 is actually sent as 5, as in the parenthesis above, meaning 5 * 4-bit words. This header length can vary, and the receiving device uses it to determine where to read from for the actual payload.
+We're using IP version 4 and the length of this IP header is 20 bytes. The 20 is actually sent as 5, as in the parenthesis above, meaning 5 * 4-byte words. This header length can vary, and the receiving device uses it to determine where to read from for the actual payload.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Differentiated Services Field</h3>
 The Differentiated Services Field is split into two parts. 
 
 The first 6 bits are the Differentiated Services Codepoint (DSCP), which indicates the priority of the packet. Here, ours is set to 000000, which is the default, "Best Effort". In delay-sensitive traffic such as voice over IP, these 6 bits would typically be set to 101110 for Expedited Forwarding (EF). You can find a list of DSCP values in Cisco's <a target="_blank" href="https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus1000/sw/4_0/qos/configuration/guide/nexus1000v_qos/qos_6dscp_val.pdf">DSCP and Precedence Values PDF</a>. 
 
-The next 2 bits are used for Explicit Congestion Notification (ECN). Historically, when a router's queue filled up due to congestion, it started to drop packets, which served as an *implicit* signal to the sender that there was network congestion. The 2 ECN bits allow the endpoints to send explicit notifications of congestion without relying on packet dropping. In this context, our 2 bits are set to 00, which indicates that this traffic is not capable of using ECN. This can be due to the settings in both the operating system's network stack and the software application. The settings for these bits are:
+The next 2 bits are used for Explicit Congestion Notification (ECN). Historically, when a router's queue filled up due to congestion, it started to drop packets, which served as an *implicit* signal to the sender that there was network congestion. The 2 ECN bits allow the endpoints to send explicit notifications of congestion without relying on packet dropping. In this context, our 2 bits are set to 00, which indicates that this traffic is not capable of using ECN. This can be due to the settings in the operating system's network stack and/or the software application. The possibe values for these bits are:
 - 00: Not ECN-Capable Transport (Non-ECT)
 - 01: ECN-Capable Transport (ECT(1))
 - 10: ECN-Capable Transport (ECT(0))
@@ -188,27 +194,70 @@ The next 2 bits are used for Explicit Congestion Notification (ECN). Historicall
 01 and 10 both indicate ECN capability, but having two values allows more nuanced traffic management strategies.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Total Length</h3>
-The "Total Length" field indicates the size of the 20-byte IP header plus the encapsulated data (here, a 32-byte TCP header). This sums to 52 bytes. To avoid fragmentation, this length must not exceed the Maximum Transmission Unit (MTU) of the receiving device, typically the router in a home network. Most router's have an MTU of 1500 bytes. The Total Length field is also used in the reassembly of fragments, where the receiving system reads the header and payload up to the length specified.
+The "Total Length" field indicates the size of the 20-byte IP header plus the encapsulated data (here, a 32-byte TCP header). This sums to 52 bytes. To avoid fragmentation, this length must not exceed the Maximum Transmission Unit (MTU) of the receiving device, typically the router in a home network. Most router's have an MTU of 1,500 bytes. The Total Length field is also used in the reassembly of fragments, where the receiving system reads the header and payload up to the length specified.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Identification</h3>
-As mentioned above, if a packet is larger than the Maximum Transmission Unit of the receiving device, it is split into fragments (multiple smaller packets) by that device. When this happens, the device gives each fragment the same 16-bit "Identification" field value before sending them on. The receiving hosts further along the path use this field to identify which fragments belong to the same original packet. Fragmentation is less common now, as modern systems send probing packets to determine the smallest MTU along the path to a destination. This is called the "Path MTU", and once it's discovered, the system can adjust the packet size accordingly to prevent fragmentation.
+As mentioned above, if a packet is larger than the Maximum Transmission Unit of the receiving device, it is split into fragments. Each fragment's own IP header contains the same 16-bit "Identification" field value. The receiving hosts further along the path use this field to identify which fragments belong to the same original packet. Fragmentation is less common now, as modern systems send probing packets to determine the smallest MTU along the path to a destination. This is called the "Path MTU", and once it's discovered, the system can adjust the packet size accordingly to prevent fragmentation.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Flags</h3>
 These three bits are used for fragmentation information.
-- The first bit is always 0.
-- The second bit is the "Don't Forget" (DF) bit. If this is set to 1, the packet should not be fragmented.
+- The first bit is always 0. It's called the reserved bit as it's reserved for future use.
+- The second bit is the "Don't Fragment" (DF) bit. If this is set to 1, the packet should not be fragmented.
 - The third bit is the "More Fragments" (MF) bit. This is set to 1 in all fragments with the same Identification value except the final fragment.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Fragment Offset</h3>
-This field indicates a fragment's offset in 8-byte blocks from the start of its original packet (not including IP headers).
+This field indicates a fragment's offset in 8-byte blocks from the start of its original packet (not including IP headers). This allows receiving devices to place the data correctly during reassembly.
+
+Let's say the original packet is 4,500 bytes long, and we need to divide it into fragments of 1,500 bytes each. That 1,500 bytes includes the 20 byte IP header, so the data portion in each fragment will be 1,480 bytes.
+
+First Fragment:
+
+- Header Length: 20 bytes
+- Data Length: 1,480 bytes
+- Fragment Offset: 0 (since this is the start of the original data)
+
+Second Fragment:
+
+- Header Length: 20 bytes
+- Data Length: 1,480 bytes
+
+- Fragment Offset: 1,480 / 8 = 185 (since the data starts 1,480 bytes into the original packet.)
 
 <h3 className="text-[navy] dark:text-[skyblue]">Time to Live</h3>
+The Time to Live (TTL) field specifies the maximum number of hops (or routers) that a packet can pass through before being discarded. It helps prevent packets from circulating endlessly in the network due to routing loops.
+
+When a packet is created and sent, the TTL value is set to a default number, commonly 64, 128, or 255, depending on the operating system or network configuration. Each time the packet is processed by a hop, the TTL value is decremented by 1. When it reaches 0, the packet is discarded. TTL is also useful in network diagnostics, where tools like "traceroute" use TTL to to determine the intermediate routers along a path.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Protocol</h3>
+This indicates which protocol is encapsulated within this IP header, much like the EtherType field did for the layer 2 Ethernet header. In our case, that's TCP (Transmission Control Protocol).
 
 <h3 className="text-[navy] dark:text-[skyblue]">Header Checksum</h3>
+The checksum ensures data integrity. It is calculated by:
+- Splitting the IP header into 16-bit words
+- Summing these binary numbers using "end-around-carry", which means if the sum exceeds 16 bits, overflow bits are carried from the most significant bit on the left to the least significant bit on the right.
+- Inverting the binary with a bitwise NOT
+
+The receiving device recalculates the checksum and compares it to the one in this header. If it doesn't match, it means the header may have been corrupted during transmission.
+
+In our case, 0x0000 indicates that validation is disabled. This is due to "checksum offloading", where the Network Interface Controller hardware handles validation.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Source and Destination IP Addresses</h3>
+Finally, we have the source and destination IP addresses. Where MAC addresses facilitied hop-by-hop communication, IP addresses facilitate "end-to-end" communication.
 
+Here, the desination address is the *public IP address* of one of my servers. The source address is a *private IP address* assigned to my computer by my home router. Private IP addresses are not used on the public internet, as they're not unique, so when my router processes this frame, it will replace the source IP in this header with its own unique public IP address using Port Address Translation (PAT). PAT also changes port numbers in the TCP header we're going to look at next, in order to keep unique mappings in the router's Address Translation Table. Using ports ensures the router can differentiate connections to the same IP address.
 
-This was just a single frame containing a SYN packet from a HTTP request. For a look at the whole TLS 1.2 handshake, see my post [The TLS 1.2 Handshake in Depth](/blog/tls_handshake_in_depth).
+PAT conserves unique IPv4 addresses, so they don't run out! IPv6 is slowly replacing IPv4, and IPv6 addresses won't run out - they're 128 bits long, so we've got 2<sup>128</sup> (340 undecillion) of those.
+
+## TCP Header (Layer 4)
+
+These are the 32 bytes in our TCP header:
+
+```yaml /e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02/ /......e......./ /fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01/ / ................/ /04 02/ / ../
+0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
+0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01   ................
+0040   04 02                                             ..
+```
+
+Here's Wireshark's packet diagram for the TCP header.
+
+![](/images/blog/http_packet_wireshark/tcp_packet_diagram.png)
