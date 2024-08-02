@@ -24,11 +24,11 @@ published: true
 
 <small className="dark:text-[skyblue] text-[#2233aa]">Note: code blocks scroll horizontally on smaller screens.</small>
 
-Above, we're looking at the binary dump for this particular packet. These are the 0s and 1s that are encoded as high and low voltage signals in wired connections, light pulses in fiber optic cables, and the modulation of electromagnetic waves in wireless communications.
+Above, we're looking at the binary dump for this particular packet. These are the 0s and 1s that are encoded as high and low voltage signals in wired connections, light pulses in fiber optic cables, and the modulation of radio waves in wireless communications.
   
 Let's understand this dump first, starting with the four digit numbers on the left. These numbers are called <strong>offsets</strong>. They're added by Wireshark for our reference and are not actually contained in the packet.
 
-Offsets are hexadecimal numbers that tell us how many bytes the beginning of the current line is offset from the beginning of the packet. For example, the third line of binary is offset 16 bytes into the packet, so the offset is 0010 (16 in hexadecimal).
+Offsets are hexadecimal numbers that tell us how many bytes the beginning of the current line is from the beginning of the packet. For example, the third line of binary is offset 16 bytes into the packet, so the offset is 0010 (16 in hexadecimal).
 
 Following each offset, you can see 8 bytes in binary. I've applied color-coded underlines to these bytes to distinguish them by their respective network layers and associated protocols.
 
@@ -109,7 +109,7 @@ See my post on [How Routers Communicate](/blog/how_routers_communicate) for way 
 <h3 id="hello" className="text-[navy] dark:text-[skyblue]">LG / IG Bits</h3>
 The LG (Local/Global) bit is the second least significant bit (the second bit from the right) of the most significant byte (the first byte on the left) of the MAC address. It indicates whether the MAC address is locally administered (1) or globally unique (0). 
 
-In this case both MAC addresses are globally unique addresses are assigned by the manufacturer. Locally administered MAC addresses are assigned by administrators within a local network. This allows flexibility, and the LG bit prevents interference with global uniqueness.
+In this case both MAC addresses are globally unique addresses assigned by the manufacturer. Locally administered MAC addresses are assigned by administrators within a local network. This allows flexibility, and the LG bit prevents interference with global uniqueness.
 
 The IG (Individual/Group) bit is the least significant bit (the first bit on the right) of the most significant byte of the MAC address. It indicates whether the MAC address is an individual (unicast) address (0) or a group (multicast/broadcast) address (1).
 
@@ -200,7 +200,7 @@ The next 2 bits are used for Explicit Congestion Notification (ECN). Historicall
 01 and 10 both indicate ECN capability, but having two values allows more nuanced traffic management strategies.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Total Length</h3>
-The "Total Length" field indicates the size of the 20-byte IP header plus the encapsulated data (here, a 32-byte TCP header). This sums to 52 bytes. To avoid fragmentation, this length must not exceed the Maximum Transmission Unit (MTU) of the receiving device, typically the router in a home network. Most router's have an MTU of 1,500 bytes. 
+The "Total Length" field indicates the size of the 20-byte IP header plus the encapsulated data (here, a 32-byte TCP header). This sums to 52 bytes. To avoid fragmentation, this length must not exceed the Maximum Transmission Unit (MTU) of the receiving device, typically the router in a home network. Most router's have an MTU of around 1,500 bytes. 
 
 If a packet is fragmented, the total length field is also used in the reassembly of fragments by the receiving system, which reads the header and payload up to the length specified.
 
@@ -211,7 +211,7 @@ As mentioned above, if a packet is larger than the Maximum Transmission Unit of 
 These three bits are used for fragmentation information.
 - The first bit is always 0. It's called the reserved bit as it's reserved for future use.
 - The second bit is the "Don't Fragment" (DF) bit. If this is set to 1, the packet should not be fragmented.
-- The third bit is the "More Fragments" (MF) bit. This is set to 1 in all fragments with the same Identification value except the final fragment.
+- The third bit is the "More Fragments" (MF) bit. This indicates whether there are more fragments to come for a given packet. It's set to 1 in all fragments with the same indentification value except the last.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Fragment Offset</h3>
 This field indicates a fragment's offset in 8-byte blocks from the start of its original packet (not including IP headers). This allows receiving devices to place the data correctly during reassembly.
@@ -248,12 +248,12 @@ The receiving device recalculates the checksum and compares it to the one in thi
 
 In our case, 0x0000 indicates that validation is disabled. This is due to "checksum offloading", where the Network Interface Controller hardware handles validation.
 
-<h3 className="text-[navy] dark:text-[skyblue]">Source and Destination IP Addresses</h3>
-Finally, we have the source and destination IP addresses. Where MAC addresses facilitated hop to hop communication, IP addresses facilitate "end to end" communication.
+<h3 id="source_destination_ip" className="text-[navy] dark:text-[skyblue]">Source and Destination IP Addresses</h3>
+At the end of the IP header, we have the source and destination IP addresses. Where MAC addresses facilitated "hop to hop" communication, IP addresses facilitate "end to end" communication.
 
 Here, the desination address is the *public IP address* of one of my servers. The source address is a *private IP address* assigned to my computer by my home router. Private IP addresses are not used on the public internet, as they're not unique, so when my router processes this packet, it will replace the source IP address in the IP header with its own unique public IP address using Port Address Translation (PAT). PAT also changes port numbers in the TCP header we're going to look at next, in order to keep unique mappings in the router's Address Translation Table. We'll look into this more below in the TCP section.
 
-PAT conserves unique IPv4 addresses so they don't run out! IPv6 is slowly replacing IPv4, and IPv6 addresses won't run out - they're 128 bits long, so we've got 2<sup>128</sup> (340 undecillion) of those.
+PAT allows all devices in a local network to use the same public IP, conserving unique IPv4 addresses. IPv6 is slowly replacing IPv4, and IPv6 addresses won't run out - they're 128 bits long, so we've got 2<sup>128</sup> (340 undecillion) of those.
 
 ## TCP Header (Layer 4)
 
@@ -338,20 +338,20 @@ Transmission Control Protocol, Src Port: 59423, Dst Port: 443, Seq: 0, Len: 0
 ```
 
 <h3 className="text-[navy] dark:text-[skyblue]">Source and Destination Ports</h3>
-Where MAC addresses facilitate hop to hop communication, and IP addresses facilitate end to end communication, ports facilitate what we might call "service to service" communication.
+Where MAC addresses facilitate "hop to hop" communication, and IP addresses facilitate "end to end" communication, ports facilitate what we might call "service to service" communication.
 
-If you're using a browser and Slack desktop at the same time, all requests sent by both of these services will have the same source MAC address in their layer 2 header, and the same source IP address in their layer 3 header. Your operating system assigns a port number here at layer 4 so it can differentiate connections.
+If you're using a browser and Slack desktop at the same time, all requests sent by both of these services will have the same source MAC address in their layer 2 header, and the same source IP address in their layer 3 header. Port numbers here at layer 4 differentiate connections. 
 
-As mentioned above, as part of Port Address Translation, the source ports in this header will be replaced by your router. When the router receives responses, it will use its Address Translation Table to return the original ports to the header, ensuring your operating system can send data to the correct service on your computer.
+In our example above, the source port is 59423. My browser process used the Windows Sockets API to "bind" to this port. The destination port is port 443. Upon processing this TCP header, my server's operating system will pass the encapsulated data to  whichever software is "listening" to that port, which in this case is an nginx web server.
 
-In our example above, the source port is 59423, assigned to my browser process by my operating system. This will be replaced by the router. The destination port is port 443. Upon processing this TCP header, my server's operating system will pass the encapsulated data to  whichever software is "listening" to that port, which in this case is an nginx web server.
+As mentioned above in the section on <a href="#source_destination_ip">Source and Destination IP Addresses</a>, as part of Port Address Translation, the source ports in this header will be replaced by your router. When the router receives responses, it will use its Address Translation Table to return the original ports to the header, ensuring your operating system can send data to port 59423 for the browser.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Stream Index, Conversation Completeness, TCP Segment Length</h3>
 Stream index, conversation completeness, and TCP segment length are calculated by Wireshark and are not in the TCP header.
 
-"Stream index" is a number Wireshark assigns to "conversations". Packets are part of the same conversation if they're sent between the same two IP / port couples and if the layer 4 protocol is the same. This SYN packet is the first of a conversation (0).
+"Stream index" is a number Wireshark assigns to "conversations". Packets are part of the same conversation in Wireshark if they're sent using the same layer 4 protocol, between the same two IP addresses, using the same port numbers. This SYN packet is the first of a conversation (0).
 
-"Conversation completeness" is calculated using the TCP flags, so we can discuss it in detail in the <a href="#tcpflags">"TCP Flags"</a> section.
+"Conversation completeness" is calculated using the TCP flags, so we can discuss it in detail in the <a href="#tcpflags">TCP Flags</a> section.
 
 "TCP segment length" is 0, because there's no actual data encapsulated in this SYN TCP header. The "three way handshake" we're initiating uses data in the TCP header itself.
 
@@ -374,7 +374,7 @@ The first three reserved bits are again for future use and always set to 0.
 
 The ECN-Echo and Congestion Window Reduced flags are used if there's network congestion. If a router experiences congestion and the ECN flag in the IP header is set to ECN-Capable, the router will set that flag to 11 (CE - Congestion Experienced), and forward the packet instead of dropping it. When the receiving TCP-endpoint receives the packet, it will detect the CE flag in the IP header and set the ECN-Echo flag in it's next TCP acknowledgement segment. When the sender receives the acknowledgement with the ECN-Echo flag set, it will set the Congestion Window Reduced flag in it's next segment to confirm it has reduced its <a href="#tcpwindow">window</a>. 
 
-This is an example of how, even though it's essential to minimise layer interaction to maintain modularity and encapsulation, some controlled interactions are acceptable.
+This is an example of how, even though it's essential to minimise interaction between layers to maintain modularity and encapsulation, some controlled interactions are acceptable.
 
 The Syn (Synchronise) and Ack (Acknowledgement) flags are are set as appropriate in the SYN &rarr; SYN ACK &rarr; ACK segments of the <a href="/blog/tls_handshake_in_depth">TLS Handshake</a>, where hosts are initialising their sequence and acknowledgement numbers.
 
@@ -388,13 +388,12 @@ For efficiency, both buffers wait until a certain amount of data has built up to
 
 The Push flag tells the sender and receiver to process their data immediately. All data in the buffers are processed, and so data is still *sent in sequence*.
 
-The Urgent flag tells the sender and receiver to process only the data specified by the Urgent Pointer immediately. The reset of the buffer is unaffected and so the urgent data is *sent out of sequence*.
+The Urgent flag tells the sender and receiver to process only the data specified by the Urgent Pointer immediately. The rest of the buffer is unaffected and so the urgent data is *sent out of sequence*.
 
 Reset and Fin are set to 1 to reset or terminate the connection, respectively.
 
 <h3 id="tcpwindow" className="text-[navy] dark:text-[skyblue]">Window</h3>
-The TCP window size, also known as the "receive window size" or "advertised window s
-ize," represents the amount of buffer space available at the receiver for incoming data. It indicates how much data the sender can transmit before needing an acknowledgment from the receiver.
+The TCP window size, also known as the "receive window size" or "advertised window size", represents the amount of buffer space available at the receiver for incoming data. It indicates how much data the sender can transmit before needing an acknowledgment from the receiver.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Checksum</h3>
 The TCP checksum is calculated using the TCP header, the encapsulated data, and a pseudo-header containing the protocol and both IP addresses. This checksum is calculated using the same operations as the IP checksum.
