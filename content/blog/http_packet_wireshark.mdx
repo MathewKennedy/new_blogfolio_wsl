@@ -1,12 +1,12 @@
 ---
-title: Ethernet Frame - Wireshark Examination
-description: Using Wireshark to examine and understand an Ethernet frame
+title: Ethernet Frame - Packet Examination
+description: Using Wireshark to examine the Ethernet, IP, and TCP headers of a SYN packet
 date: 2024-03-04
-tags: ["networking", "wireshark"]
+tags: ["networking", "wireshark", "tcp"]
 published: true
 ---
 
-🦈 [Wireshark](https://www.wireshark.org/about.html) is a network protocol analyser for macOS, Linux, and Windows. You can learn how to use Wireshark at [Wireshark Learn](https://www.wireshark.org/learn). This post aims to explain in its entirety a single Ethernet II frame capture containing a SYN packet.
+🦈 [Wireshark](https://www.wireshark.org/about.html) is a network protocol analyser for macOS, Linux, and Windows. You can learn how to use Wireshark at [Wireshark Learn](https://www.wireshark.org/learn). This post aims to explain a SYN packet capture in its entirety.
 
 ## The Binary Dump
 
@@ -24,11 +24,11 @@ published: true
 
 <small className="dark:text-[skyblue] text-[#2233aa]">Note: code blocks scroll horizontally on smaller screens.</small>
 
-Above, we're looking at the binary dump for this particular frame. These are the 0s and 1s that are encoded as high and low voltage signals in wired connections, light pulses in fiber optic cables, and the modulation of electromagnetic waves in wireless communications.
+Above, we're looking at the binary dump for this particular packet. These are the 0s and 1s that are encoded as high and low voltage signals in wired connections, light pulses in fiber optic cables, and the modulation of electromagnetic waves in wireless communications.
   
-Let's understand this dump first, starting with the four digit numbers on the left. These numbers are called <strong>offsets</strong>. They're added by Wireshark for our reference and are not actually contained in Ethernet frames.
+Let's understand this dump first, starting with the four digit numbers on the left. These numbers are called <strong>offsets</strong>. They're added by Wireshark for our reference and are not actually contained in the packet.
 
-Offsets are hexadecimal numbers that tell us how many bytes the current line is offset from the beginning of the frame. For example, the third line of binary is offset 16 bytes into the frame, so the offset is 0010 (16 in hexadecimal).
+Offsets are hexadecimal numbers that tell us how many bytes the beginning of the current line is offset from the beginning of the packet. For example, the third line of binary is offset 16 bytes into the packet, so the offset is 0010 (16 in hexadecimal).
 
 Following each offset, you can see 8 bytes in binary. I've applied color-coded underlines to these bytes to distinguish them by their respective network layers and associated protocols.
 
@@ -38,7 +38,7 @@ Layer 2 Ethernet II bytes Layer 3 IPv4 bytes Layer 4 TCP bytes
 
 Wireshark uses highlighting to differentiate layers and protocols in this way.
 
-Let's look at the equivalent hexadecimal dump before examining each layer of the frame.
+Let's look at the equivalent hexadecimal dump before examining each layer of the packet.
 
 ## The Hexadecimal Dump
 
@@ -50,9 +50,9 @@ Let's look at the equivalent hexadecimal dump before examining each layer of the
 0040   04 02                                             ..
 ```
 
-Now, we're looking at the hexadecimal dump of the same frame.
+Now, we're looking at the hexadecimal dump of the same packet.
 
-The four digit numbers on the left are again the offsets of each line. Because the actual data is now displayed in hexadecimal, twice as many bytes fit on a single line. Consequenty, you can see the offsets increment by 16 bytes instead of 8 bytes: 0010 (16), 0020 (32), 0030 (48), and so on.
+The four digit numbers on the left are again the offsets. Because the actual data is now displayed in hexadecimal, twice as many bytes fit on a single line. Consequenty, you can see the offsets increment by 16 bytes instead of 8 bytes: 0010 (16), 0020 (32), 0030 (48), and so on.
 
 At the end of each row in this dump, we can see the corresponding ASCII characters for the bytes in that row, if they're printable. This is to allow us to quickly see any readable text in a packet. SYN packets don't generally contain readable text, but take a look at the ASCII from a later packet:
 
@@ -66,21 +66,21 @@ The ASCII makes it a lot easier to identify certain parts of the packet, such as
 
 Note that the ASCII characters are also included in the binary dump in Wireshark, but there's more space to examine them here.
 
-We're going to use two of Wireshark's panes to help us understand the content of each layer. In the <span className="text-[navy] dark:text-[skyblue]">packet detail</span> pane, Wireshark adds labels and looks up or infers more information for us using protocol standards. The <span className="dark:text-[bisque] text-[brown]">packet diagram</span> pane gives a visual layout of bytes.
+We're going to use two of Wireshark's panes to help us understand the content of each layer. In the <span className="text-[navy] dark:text-[skyblue]">packet detail</span> pane, Wireshark adds labels and looks up or infers more information for us using protocol standards. The <span className="dark:text-[bisque] text-[brown]">packet diagram</span> pane gives a visual layout of the data.
 
 ## Ethernet II Header (Layer 2)
 
-These are the 14 bytes in the Ethernet II header of our original frame:
+These are the 14 bytes in the Ethernet II header of our original packet:
 
 ```yaml /8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00/#b /.......W....../#b
 0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 0045 00   .......W......E.
 ```
 
-The packet diagram for Ethernet shows us what's in each byte:
+The packet diagram for Ethernet headers shows us what's in each byte:
 
 ![`An ethernet header packet diagram`](/images/blog/http_packet_wireshark/ethernet_packet_diagram.png)
 
-The diagram is 32 bits (4 bytes) wide, zero-indexed. We can see from the rows that the frame contains:
+The diagram is 32 bits (4 bytes) wide, zero-indexed. We can see from the rows that the header contains:
 - The destination MAC address (6 bytes)
 - The source MAC address (6 bytes)
 - The EtherType (2 bytes)
@@ -100,20 +100,24 @@ Ethernet II, Src: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa), Dst: HuaweiTe_80:a0:1a 
     Type: IPv4 (0x0800)
 ```
 <h3 className="text-[navy] dark:text-[skyblue]">Destination and Source MAC Addresses</h3>
-MAC addresses are assigned to a Network Interface Controller (NIC) to give a device a unique address within a network. They facilitate the "hop to hop" communication between the two devices a frame is currently being passed to and from. In this case the destination MAC address belongs to a NIC in my home router, and the source MAC address belongs to a NIC in my computer.
+MAC addresses are assigned to a Network Interface Controller (NIC) to give a device a unique address within a network. They facilitate the "hop to hop" communication between the two devices a packet is currently being passed to and from. In this case the destination MAC address belongs to a NIC in my home router, and the source MAC address belongs to a NIC in my computer.
 
 Devices can have multiple network interface controllers, some physical and some virtual, each with their own MAC address, meaning a single device often uses multiple MAC addresses for network communications. For example, your computer might have different NICs for WiFi, wired Ethernet, Bluetooth, and virtual private network (VPN) connections.
 
 See my post on [How Routers Communicate](/blog/how_routers_communicate) for way more detail.
 
 <h3 id="hello" className="text-[navy] dark:text-[skyblue]">LG / IG Bits</h3>
-The LG (Local/Global) bit is the second least significant bit (the second bit from the right) of the most significant byte (the first byte on the left) of the MAC address. It indicates whether the MAC address is locally administered (1) or globally unique (0). In this case both MAC addresses are globally unique.
+The LG (Local/Global) bit is the second least significant bit (the second bit from the right) of the most significant byte (the first byte on the left) of the MAC address. It indicates whether the MAC address is locally administered (1) or globally unique (0). 
 
--- difference / example of local / global --
+In this case both MAC addresses are globally unique addresses are assigned by the manufacturer. Locally administered MAC addresses are assigned by administrators within a local network. This allows flexibility, and the LG bit prevents interference with global uniqueness.
 
-The IG (Individual/Group) bit is the least significant bit (the first bit on the right) of the most significant byte of the MAC address. It indicates whether the MAC address is an individual (unicast) address (0) or a group (multicast/broadcast) address (1). In this case both MAC addresses are unicast.
+The IG (Individual/Group) bit is the least significant bit (the first bit on the right) of the most significant byte of the MAC address. It indicates whether the MAC address is an individual (unicast) address (0) or a group (multicast/broadcast) address (1).
 
--- difference / example of unicast/mutlicast/broadcst --
+In this case both MAC addresses are unicast.
+
+- Unicast MAC addresses are are used for communication between a single sender and a single receiver. 
+- Multicast MAC addresses are used for communication between a single sender and multiple specific receivers. Devices that want to receive multicast traffic must join a multicast group.
+- The broadcast MAC address FF:FF:FF:FF:FF:FF is used for communication between a single sender and all devices on the network.
 
 Wireshark displays the LG and IG bits visually using periods as the surrounding bits before the human-readable information.
 
@@ -129,12 +133,12 @@ Let's move on to examine that layer 3 IPv4 header.
 
 These are the 20 bytes in the IP header of our original frame:
 
-```yaml /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p /.......W....../#p
+```yaml /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p /E./#p /.4Z)@.........#./#p /.N/#p
 0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00 45 00   .......W......E.
 0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
-0020   c2 4ee8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
+0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
 ```
-Again, let's consult Wireshark's packet diagram for IPv4 to see what it contains.
+Again, let's consult Wireshark's packet diagram of an IPv4 header to see what it contains.
 
 ![`An IP header packet diagram`](/images/blog/http_packet_wireshark/ip_packet_diagram.png)
 
@@ -178,12 +182,14 @@ Internet Protocol Version 4, Src: 192.168.1.30, Dst: 35.178.194.78
 Like with the LG bit and IG bit in the layer 2 frame, Wireshark again uses periods, 1s, and 0s to indicate which bits the human-readable information pertains to.
 
 <h3 className="text-[navy] dark:text-[skyblue]">IP Version and Header Length</h3>
-We're using IP version 4 and the length of this IP header is 20 bytes. The 20 is actually sent as 5, as in the parenthesis above, meaning 5 * 4-byte words. This header length can vary, and the receiving device uses it to determine where to read from for the actual payload.
+We're using IP version 4 and the length of this IP header is 20 bytes. The 20 is actually sent as 5 for efficiency, meaning 5 * 4-byte words. This header length can vary, and the receiving device uses it to determine where to read from for the actual payload.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Differentiated Services Field</h3>
 The Differentiated Services Field is split into two parts. 
 
-The first 6 bits are the Differentiated Services Codepoint (DSCP), which indicates the priority of the packet. Here, ours is set to 000000, which is the default, "Best Effort". In delay-sensitive traffic such as voice over IP, these 6 bits would typically be set to 101110 for Expedited Forwarding (EF). You can find a list of DSCP values in Cisco's <a target="_blank" href="https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus1000/sw/4_0/qos/configuration/guide/nexus1000v_qos/qos_6dscp_val.pdf">DSCP and Precedence Values PDF</a>. 
+The first 6 bits are the Differentiated Services Codepoint (DSCP), which indicates the priority of the packet. Here, ours is set to 000000, which is the default, "Best Effort". In delay-sensitive traffic such as voice over IP, these 6 bits would typically be set to 101110 for Expedited Forwarding (EF). You can find a list of DSCP values in Cisco's <a target="_blank" href="https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus1000/sw/4_0/qos/configuration/guide/nexus1000v_qos/qos_6dscp_val.pdf">DSCP and Precedence Values PDF</a>.
+
+<h3 className="text-[navy] dark:text-[skyblue]">Explicit Congestion Notification</h3>
 
 The next 2 bits are used for Explicit Congestion Notification (ECN). Historically, when a router's queue filled up due to congestion, it started to drop packets, which served as an *implicit* signal to the sender that there was network congestion. The 2 ECN bits allow the endpoints to send explicit notifications of congestion without relying on packet dropping. In this context, our 2 bits are set to 00, which indicates that this traffic is not capable of using ECN. This can be due to the settings in the operating system's network stack and/or the software application. The possibe values for these bits are:
 - 00: Not ECN-Capable Transport (Non-ECT)
@@ -227,10 +233,10 @@ Second Fragment:
 <h3 className="text-[navy] dark:text-[skyblue]">Time to Live</h3>
 The Time to Live (TTL) field specifies the maximum number of hops (or routers) that a packet can pass through before being discarded. It helps prevent packets from circulating endlessly in the network due to routing loops.
 
-When a packet is created and sent, the TTL value is set to a default number, commonly 64, 128, or 255, depending on the operating system or network configuration. Each time the packet is processed by a hop, the TTL value is decremented by 1. When it reaches 0, the packet is discarded. TTL is also useful in network diagnostics, where tools like "traceroute" use TTL to to determine the intermediate routers along a path.
+When a packet is created and sent, the TTL value is set to a default number, commonly 64, 128, or 255, depending on the operating system or network configuration. Each time the packet is processed by a hop, the TTL value is decremented by 1. When it reaches 0, the packet is discarded.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Protocol</h3>
-This indicates which protocol is encapsulated within this IP header, much like the EtherType field did for the layer 2 Ethernet header. In our case, that's TCP (Transmission Control Protocol), represented by the number 6.
+This indicates which protocol is encapsulated within this IP header. In our case, that's TCP (Transmission Control Protocol), represented by the number 6.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Header Checksum</h3>
 The checksum ensures data integrity. It is calculated by:
@@ -336,7 +342,7 @@ Where MAC addresses facilitate hop to hop communication, and IP addresses facili
 
 If you're using a browser and Slack desktop at the same time, all requests sent by both of these services will have the same source MAC address in their layer 2 header, and the same source IP address in their layer 3 header. Your operating system assigns a port number here at layer 4 so it can differentiate connections.
 
-As mentioned above, as part of Port Address Translation, the ports in this header will be replaced by your router. When the router receives responses, it will use its Address Translation Table to return the original ports to the header, ensuring your operating system can send data to the correct service.
+As mentioned above, as part of Port Address Translation, the source ports in this header will be replaced by your router. When the router receives responses, it will use its Address Translation Table to return the original ports to the header, ensuring your operating system can send data to the correct service on your computer.
 
 In our example above, the source port is 59423, assigned to my browser process by my operating system. This will be replaced by the router. The destination port is port 443. Upon processing this TCP header, my server's operating system will pass the encapsulated data to  whichever software is "listening" to that port, which in this case is an nginx web server.
 
@@ -345,22 +351,59 @@ Stream index, conversation completeness, and TCP segment length are calculated b
 
 "Stream index" is a number Wireshark assigns to "conversations". Packets are part of the same conversation if they're sent between the same two IP / port couples and if the layer 4 protocol is the same. This SYN packet is the first of a conversation (0).
 
-"Conversation completeness" is calculated using the TCP flags, so we can discuss it in detail in the <a href="#flags">"Flags"</a> section.
+"Conversation completeness" is calculated using the TCP flags, so we can discuss it in detail in the <a href="#tcpflags">"TCP Flags"</a> section.
 
-"TCP segment length" is 0, because there's no actual data encapsulated in this SYN TCP header. The "three way handshake" we're in uses data in the TCP header itself.
+"TCP segment length" is 0, because there's no actual data encapsulated in this SYN TCP header. The "three way handshake" we're initiating uses data in the TCP header itself.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Sequence Number and Acknowledgement Number</h3>
 The sequence number tracks the bytes that are sent, and the acknowledgement number tracks the bytes that are received.
 
 When we send data, we add a sequence number, for example 3985403374. This is pseudo-randomly generated to make it hard to guess. When the recipient receives the data from the segment with that sequence number, they send back an acknowledgement number equal to that sequence number plus the bytes received. This happens in both directions of communication.
 
-As an example, say we send the sequence number 3985403374 to my server, and the TCP Segment Length we're sending is 64 bytes, the server will respond with an acknowledgement number of 3985403438 (3985403374 + 64). This acknowledgement number will be used as our next sequence number. If either party doesn't receive an acknowledgement its expecting within a given time, it will resend the segment with that sequence number. If either party receives a duplicate segment, it will resend the appropriate acknlowedgement.
+As an example, say we send the sequence number 3985403374 to my server, and the TCP Segment Length we're sending is 64 bytes, the server will respond with an acknowledgement number of 3985403438 (3985403374 + 64). This acknowledgement number will be used as our next sequence number. If either party doesn't receive an acknowledgement number it's expecting within a given time, it will resend the segment with that sequence number. If either party receives a duplicate segment, it will resend the appropriate acknlowedgement.
 
 The pseudo-random initial sequence numbers are quite large, so Wireshark displays "relative" sequence and acknowledgement numbers that start at 0 for each conversation.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Header Length</h3>
 This is the size of this TCP header not including encapsulated data. Here ours is 32 bytes, sent as 8 (8 * 4-byte words, as with IP header length at layer 3).
 
-<h3 className="text-[navy] dark:text-[skyblue]">TCP Flags</h3>
+<h3 id="tcpflags" className="text-[navy] dark:text-[skyblue]">TCP Flags</h3>
+These flags are used to indicate the state of the TCP connection.
+
+The first three reserved bits are again for future use and always set to 0.
+
+The ECN-Echo and Congestion Window Reduced flags are used if there's network congestion. If a router experiences congestion and the ECN flag in the IP header is set to ECN-Capable, the router will set that flag to 11 (CE - Congestion Experienced), and forward the packet instead of dropping it. When the receiving TCP-endpoint receives the packet, it will detect the CE flag in the IP header and set the ECN-Echo flag in it's next TCP acknowledgement segment. When the sender receives the acknowledgement with the ECN-Echo flag set, it will set the Congestion Window Reduced flag in it's next segment to confirm it has reduced its <a href="#tcpwindow">window</a>. 
+
+This is an example of how, even though it's essential to minimise layer interaction to maintain modularity and encapsulation, some controlled interactions are acceptable.
+
+The Syn (Synchronise) and Ack (Acknowledgement) flags are are set as appropriate in the SYN &rarr; SYN ACK &rarr; ACK segments of the <a href="/blog/tls_handshake_in_depth">TLS Handshake</a>, where hosts are initialising their sequence and acknowledgement numbers.
+
+To understand Push and Urgent flags, we need to understand the buffers that hosts maintain during a TCP connection. 
+
+Senders maintain a buffer of unacknowledged data (in case it needs to be resent) and data yet to be sent. When data is acknowledged by the receiver, it can be deleted from the buffer. 
+
+Receivers maintain a buffer containing data that is yet to be processed, or data that is received out of order and awaiting missing segments.
+
+For efficiency, both buffers wait until a certain amount of data has built up to either send that data out as a segment or to pass it to the appropriate application.
+
+The Push flag tells the sender and receiver to process their data immediately. All data in the buffers are processed, and so data is still *sent in sequence*.
+
+The Urgent flag tells the sender and receiver to process only the data specified by the Urgent Pointer immediately. The reset of the buffer is unaffected and so the urgent data is *sent out of sequence*.
+
+Reset and Fin are set to 1 to reset or terminate the connection, respectively.
+
+<h3 id="tcpwindow" className="text-[navy] dark:text-[skyblue]">Window</h3>
+The TCP window size, also known as the "receive window size" or "advertised window s
+ize," represents the amount of buffer space available at the receiver for incoming data. It indicates how much data the sender can transmit before needing an acknowledgment from the receiver.
+
+<h3 className="text-[navy] dark:text-[skyblue]">Checksum</h3>
+The TCP checksum is calculated using the TCP header, the encapsulated data, and a pseudo-header containing the protocol and both IP addresses. This checksum is calculated using the same operations as the IP checksum.
+
+Because the IP addresses are needed for the pseudo-header, the layer 4 TCP software of a network stack must access information from the layer 3 IP header. This is another example of controlled interactions between network layers.
+
+<h3 className="text-[navy] dark:text-[skyblue]">Urgent Pointer</h3>
+The urgent pointer indicates the offset in bytes from the current sequence number to the end of the urgent data discussed in the <a href="tcpflags">TCP flags</a> section.
+
+<h3 className="text-[navy] dark:text-[skyblue]">Options</h3>
 
 
