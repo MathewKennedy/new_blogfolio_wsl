@@ -1,5 +1,5 @@
 ---
-title: Ethernet Frame - Packet Examination
+title: Wireshark Packet Examination
 description: Using Wireshark to examine the Ethernet, IP, and TCP headers of a SYN packet
 date: 2024-03-04
 tags: ["networking", "wireshark", "tcp"]
@@ -54,7 +54,7 @@ Now, we're looking at the hexadecimal dump of the same packet.
 
 The four digit numbers on the left are again the offsets. Because the actual data is now displayed in hexadecimal, twice as many bytes fit on a single line. Consequenty, you can see the offsets increment by 16 bytes instead of 8 bytes: 0010 (16), 0020 (32), 0030 (48), and so on.
 
-At the end of each row in this dump, we can see the corresponding ASCII characters for the bytes in that row, if they're printable. This is to allow us to quickly see any readable text in a packet. SYN packets don't generally contain readable text, but take a look at the ASCII from a later packet:
+At the end of each row, we can see the corresponding ASCII characters for the bytes in that row, if they're printable. This is to allow us to quickly see any readable text in a packet. SYN packets don't generally contain readable text, but take a look at the ASCII from a later packet:
 
 ```yaml /www.mathewk/ /ennedy.com/ /77 77 77 2e 6d 61 74 68 65 77 6b/ /65 6e 6e 65 64 79 2e 63 6f 6d/
 06d0   17 00 2b 00 07 06 5a 5a 03 04 03 03 00 00 00 1a   ..+...ZZ........
@@ -74,7 +74,11 @@ These are the 14 bytes in the Ethernet II header of our original packet:
 
 ```yaml /8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00/#b /.......W....../#b
 0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 0045 00   .......W......E.
-```
+0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
+0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
+0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01   ................
+0040   04 02
+```  
 
 The packet diagram for Ethernet headers shows us what's in each byte:
 
@@ -100,7 +104,7 @@ Ethernet II, Src: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa), Dst: HuaweiTe_80:a0:1a 
     Type: IPv4 (0x0800)
 ```
 <h3 className="text-[navy] dark:text-[skyblue]">Destination and Source MAC Addresses</h3>
-MAC addresses are assigned to a Network Interface Controller (NIC) to give a device a unique address within a network. They facilitate the "hop to hop" communication between the two devices a packet is currently being passed to and from. In this case the destination MAC address belongs to a NIC in my home router, and the source MAC address belongs to a NIC in my computer.
+MAC addresses are assigned to a Network Interface Controller (NIC) to give that NIC a unique address within a network. They facilitate the "hop to hop" communication between the two devices a packet is currently being passed to and from. In this case the destination MAC address belongs to a NIC in my home router, and the source MAC address belongs to a NIC in my computer.
 
 Devices can have multiple network interface controllers, some physical and some virtual, each with their own MAC address, meaning a single device often uses multiple MAC addresses for network communications. For example, your computer might have different NICs for WiFi, wired Ethernet, Bluetooth, and virtual private network (VPN) connections.
 
@@ -137,7 +141,10 @@ These are the 20 bytes in the IP header of our original frame:
 0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00 45 00   .......W......E.
 0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
 0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
+0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01    ................
+0040   04 02
 ```
+
 Again, let's consult Wireshark's packet diagram of an IPv4 header to see what it contains.
 
 ![`An IP header packet diagram`](/images/blog/http_packet_wireshark/ip_packet_diagram.png)
@@ -191,7 +198,7 @@ The first 6 bits are the Differentiated Services Codepoint (DSCP), which indicat
 
 <h3 className="text-[navy] dark:text-[skyblue]">Explicit Congestion Notification</h3>
 
-The next 2 bits are used for Explicit Congestion Notification (ECN). Historically, when a router's queue filled up due to congestion, it started to drop packets, which served as an *implicit* signal to the sender that there was network congestion. The 2 ECN bits allow the endpoints to send explicit notifications of congestion without relying on packet dropping. In this context, our 2 bits are set to 00, which indicates that this traffic is not capable of using ECN. This can be due to the settings in the operating system's network stack and/or the software application. The possibe values for these bits are:
+The next 2 bits are used for Explicit Congestion Notification (ECN). Historically, when a router's queue filled up due to congestion, it started to drop packets, which served as an *implicit* signal to the sender that there was network congestion. The 2 ECN bits allow the endpoints to send explicit notifications of congestion without relying on packet dropping. In this context, our 2 bits are set to 00, which indicates that this traffic is not capable of using ECN. This can be due to the settings in the software application being used. The possibe values for these bits are:
 - 00: Not ECN-Capable Transport (Non-ECT)
 - 01: ECN-Capable Transport (ECT(1))
 - 10: ECN-Capable Transport (ECT(0))
@@ -205,7 +212,7 @@ The "Total Length" field indicates the size of the 20-byte IP header plus the en
 If a packet is fragmented, the total length field is also used in the reassembly of fragments by the receiving system, which reads the header and payload up to the length specified.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Identification</h3>
-As mentioned above, if a packet is larger than the Maximum Transmission Unit of the receiving device, it is split into fragments. Each fragment's own IP header contains the same 16-bit "Identification" field value. The receiving hosts further along the path use this field to identify which fragments belong to the same original packet. Fragmentation is less common now, as modern systems send probing packets to determine the smallest MTU along the path to a destination. This is called the "Path MTU", and once it's discovered, the system can adjust the packet size accordingly to prevent fragmentation.
+As mentioned above, if a packet is larger than the Maximum Transmission Unit of the receiving device, it is split into fragments. Each fragment's own IP header contains the same 16-bit "Identification" field value. Receiving hosts use this field to identify which fragments belong to the same original packet. Fragmentation is less common now, as modern systems send probing packets to determine the smallest MTU along the path to a destination. This is called the "Path MTU", and once it's discovered, the system can adjust packet size accordingly to prevent fragmentation.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Flags</h3>
 These three bits are used for fragmentation information.
@@ -251,18 +258,24 @@ In our case, 0x0000 indicates that validation is disabled. This is due to "check
 <h3 id="source_destination_ip" className="text-[navy] dark:text-[skyblue]">Source and Destination IP Addresses</h3>
 At the end of the IP header, we have the source and destination IP addresses. Where MAC addresses facilitated "hop to hop" communication, IP addresses facilitate "end to end" communication.
 
-Here, the desination address is the *public IP address* of one of my servers. The source address is a *private IP address* assigned to my computer by my home router. Private IP addresses are not used on the public internet, as they're not unique, so when my router processes this packet, it will replace the source IP address in the IP header with its own unique public IP address using Port Address Translation (PAT). PAT also changes port numbers in the TCP header we're going to look at next, in order to keep unique mappings in the router's Address Translation Table. We'll look into this more below in the TCP section.
+Here, the desination address is the *public IP address* for one of my servers.
+
+The source address is a *private IP address* assigned to my computer by my home router. Private IP addresses are not used on the public internet, as they're not unique. When my router processes this packet, it will replace the private source IP address in the IP header with its own unique public IP address using Network Address Translation (NAT), more specifically Port Address Translation (PAT). It keeps track of this change in an Address Translation Table. When my server responds with packets, the destination IP address in the IP headers will be my router's public IP address, and my router will use the Address Translation Table to change the destination IP address to my computer's private IP address before sending it to my computer's NIC.
 
 PAT allows all devices in a local network to use the same public IP, conserving unique IPv4 addresses. IPv6 is slowly replacing IPv4, and IPv6 addresses won't run out - they're 128 bits long, so we've got 2<sup>128</sup> (340 undecillion) of those.
+
+PAT also changes port numbers in the TCP header (which we'll look at next) in order to keep unique mappings in the router's Address Translation Table.
 
 ## TCP Header (Layer 4)
 
 These are the 32 bytes in our TCP header:
 
-```yaml /e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02/#y /......e......./#y /fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01/#y / ................/#y /04 02/#y / ../#y
-0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
-0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01   ................
-0040   04 02                                             ..
+```yaml /e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02/#y /......e......./#y /fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01/#y /................/#y /04 02/#y /.. /#y
+0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00 45 00   .......W......E.
+0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
+0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02  .N......e.......
+0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01  ................
+0040   04 02                                            .. 
 ```
 
 Here's Wireshark's packet diagram for the TCP header.
@@ -342,9 +355,11 @@ Where MAC addresses facilitate "hop to hop" communication, and IP addresses faci
 
 If you're using a browser and Slack desktop at the same time, all requests sent by both of these services will have the same source MAC address in their layer 2 header, and the same source IP address in their layer 3 header. Port numbers here at layer 4 differentiate connections. 
 
-In our example above, the source port is 59423. My browser process used the Windows Sockets API to "bind" to this port. The destination port is port 443. Upon processing this TCP header, my server's operating system will pass the encapsulated data to  whichever software is "listening" to that port, which in this case is an nginx web server.
+In our example above, the source port is 59423. My browser process used the Windows Sockets API to "bind" to the "socket" <span className="text-[pink]">192.168.1.30</span>:<span className="text-[bisque]">59423</span>. A socket is a combination of an IP address and port number. The browser can now use the socket to initiate connections and receive data via the operating system.
 
-As mentioned above in the section on <a href="#source_destination_ip">Source and Destination IP Addresses</a>, as part of Port Address Translation, the source ports in this header will be replaced by your router. When the router receives responses, it will use its Address Translation Table to return the original ports to the header, ensuring your operating system can send data to port 59423 for the browser.
+The destination port is port 443. Upon processing this TCP header, my server's operating system will pass the encapsulated data to whichever software is "listening" for incoming connections on the socket <span className="text-[pink]">35.178.194.78</span>:<span className="text-[bisque]">443</span>, which in this case is an nginx web server.
+
+As mentioned above in the section on <a href="#source_destination_ip">Source and Destination IP Addresses</a>, as part of Port Address Translation, the source ports in this header will be replaced by your router. When the router receives responses, it will use its Address Translation Table to return the original source port to the header, ensuring your operating system can send data to port 59423 for the browser.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Stream Index, Conversation Completeness, TCP Segment Length</h3>
 Stream index, conversation completeness, and TCP segment length are calculated by Wireshark and are not in the TCP header.
@@ -355,7 +370,7 @@ Stream index, conversation completeness, and TCP segment length are calculated b
 
 "TCP segment length" is 0, because there's no actual data encapsulated in this SYN TCP header. The "three way handshake" we're initiating uses data in the TCP header itself.
 
-<h3 className="text-[navy] dark:text-[skyblue]">Sequence Number and Acknowledgement Number</h3>
+<h3 id="tcp_sequence_acknowledgement" className="text-[navy] dark:text-[skyblue]">Sequence Number and Acknowledgement Number</h3>
 The sequence number tracks the bytes that are sent, and the acknowledgement number tracks the bytes that are received.
 
 When we send data, we add a sequence number, for example 3985403374. This is pseudo-randomly generated to make it hard to guess. When the recipient receives the data from the segment with that sequence number, they send back an acknowledgement number equal to that sequence number plus the bytes received. This happens in both directions of communication.
@@ -372,7 +387,7 @@ These flags are used to indicate the state of the TCP connection.
 
 The first three reserved bits are again for future use and always set to 0.
 
-The ECN-Echo and Congestion Window Reduced flags are used if there's network congestion. If a router experiences congestion and the ECN flag in the IP header is set to ECN-Capable, the router will set that flag to 11 (CE - Congestion Experienced), and forward the packet instead of dropping it. When the receiving TCP-endpoint receives the packet, it will detect the CE flag in the IP header and set the ECN-Echo flag in it's next TCP acknowledgement segment. When the sender receives the acknowledgement with the ECN-Echo flag set, it will set the Congestion Window Reduced flag in it's next segment to confirm it has reduced its <a href="#tcpwindow">window</a>. 
+The ECN-Echo and Congestion Window Reduced flags are used if there's network congestion. If a router experiences congestion and the ECN flag in the IP header is set to ECN-Capable, the router will set that flag to 11 (CE - Congestion Experienced), and forward the packet instead of dropping it. When the host receives the packet, it will detect the CE flag in the IP header and set the ECN-Echo flag in it's next TCP acknowledgement segment. When the sender receives the acknowledgement with the ECN-Echo flag set, it will set the Congestion Window Reduced flag in it's next segment to confirm it has reduced its <a href="#tcpwindow">window</a>. 
 
 This is an example of how, even though it's essential to minimise interaction between layers to maintain modularity and encapsulation, some controlled interactions are acceptable.
 
@@ -404,5 +419,24 @@ Because the IP addresses are needed for the pseudo-header, the layer 4 TCP softw
 The urgent pointer indicates the offset in bytes from the current sequence number to the end of the urgent data discussed in the <a href="tcpflags">TCP flags</a> section.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Options</h3>
+TCP options allow us to modify or enhance the standard behaviour of the protocol. 
 
+Maximum Segment Size is the largest TCP segment size (in bytes) the sender can receive without fragmentation. In our example mine is 1,460 bytes.
 
+The Window Scale option allows for larger window sizes than the standard 16-bit <a href="tcpwindow">Window</a> field can accommodate. By shifting the 16-bit base Window value to the left, we can raise the window size to powers of 2.
+
+In our example, the 16-bit base Window size is 11111010 11110000 (64,240 in decimal, so 64,240 bytes). Our Window Scale shift count is 8, so we shift bits 8 to the left: 
+
+```yaml
+00000000 11111010 11110000 (6,420)
+   <-       <-       <-    shift left by 8 bits
+11111010 11110000 00000000 (16,777,215)
+```
+
+This is the equivalent of multiplying our base Window value by 256.
+
+The SACK permitted option stands for "Selective Acknowledgement". Without this option, TCP uses "Cumulative Acknowledgement" as described in the <a href="#tcp_sequence_acknowledgement">Sequence Number and Acknowledgement Number</a> section. Cumulative acknowledgement essentially says "I've received everything up to this point". This means that if a packet is lost and resent out of sequence for any reason, the receiver will send an acknowledgement for that packet, and the sender will retransmit all data that followed the lost packet, even if it's already been received.
+
+SACK permitted, when set in the initial SYN packet of a three way handshake, is allowing the receiver to modify it's acknowledgement field to acknowledge data out of sequence to avoid this unecessary retransmission.
+
+The "No-Operation" options are 1 byte options used to "pad" the data so that all options are 32-bits in length. 32 bit options can be parsed more efficiently by modern software and hardware. This is why the IP and TCP Header Length fields also multiply 4-byte (32 bit) words.
