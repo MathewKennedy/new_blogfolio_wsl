@@ -135,7 +135,7 @@ Let's move on to examine that layer 3 IPv4 header.
 
 ## IP Header (Layer 3)
 
-These are the 20 bytes in the IP header of our original frame:
+These are the 20 bytes in the IP header of our original packet:
 
 ```yaml /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p /E./#p /.4Z)@.........#./#p /.N/#p
 0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00 45 00   .......W......E.
@@ -186,7 +186,7 @@ Internet Protocol Version 4, Src: 192.168.1.30, Dst: 35.178.194.78
     Destination Address: 35.178.194.78
 ```
 
-Like with the LG bit and IG bit in the layer 2 frame, Wireshark again uses periods, 1s, and 0s to indicate which bits the human-readable information pertains to.
+Like with the LG bit and IG bit in the layer 2 header, Wireshark again uses periods, 1s, and 0s to indicate which bits the human-readable information pertains to.
 
 <h3 className="text-[navy] dark:text-[skyblue]">IP Version and Header Length</h3>
 We're using IP version 4 and the length of this IP header is 20 bytes. The 20 is actually sent as 5 for efficiency, meaning 5 * 4-byte words. This header length can vary, and the receiving device uses it to determine where to read from for the actual payload.
@@ -245,7 +245,7 @@ When a packet is created and sent, the TTL value is set to a default number, com
 <h3 className="text-[navy] dark:text-[skyblue]">Protocol</h3>
 This indicates which protocol is encapsulated within this IP header. In our case, that's TCP (Transmission Control Protocol), represented by the number 6.
 
-<h3 className="text-[navy] dark:text-[skyblue]">Header Checksum</h3>
+<h3 id="ipchecksum" className="text-[navy] dark:text-[skyblue]">Header Checksum</h3>
 The checksum ensures data integrity. It is calculated by:
 - Splitting the IP header into 16-bit words
 - Summing these binary numbers using "end-around-carry", which means if the sum exceeds 16 bits, overflow bits are carried from the most significant bit on the left to the least significant bit on the right.
@@ -357,9 +357,9 @@ If you're using a browser and Slack desktop at the same time, all requests sent 
 
 In our example above, the source port is 59423. My browser process used the Windows Sockets API to "bind" to the "socket" <span className="text-[pink]">192.168.1.30</span>:<span className="text-[bisque]">59423</span>. A socket is a combination of an IP address and port number. The browser can now use the socket to initiate connections and receive data via the operating system.
 
-The destination port is port 443. Upon processing this TCP header, my server's operating system will pass the encapsulated data to whichever software is "listening" for incoming connections on the socket <span className="text-[pink]">35.178.194.78</span>:<span className="text-[bisque]">443</span>, which in this case is an nginx web server.
+The destination port is port 443. Upon processing this TCP header, my server's operating system will pass the encapsulated data to whichever software is "listening" for incoming connections on the socket <span className="text-[pink]">35.178.194.78</span>:<span className="text-[bisque]">443</span>, which in this case is nginx (web server software).
 
-As mentioned above, my router changes the source port in outbound TCP headers as part of Port Address Translation. This ensures unique mappings between private and public IP addresses in the router's Address Translation Table. When my router receives responses, it will use the Address Translation Table to return the original port and IP address to the response TCP headers, ensuring my operating system can send data to port 59423 for the browser.
+As mentioned above, my router changes the source port in outbound TCP headers as part of Port Address Translation. This ensures unique mappings between private and public IP addresses in the router's Address Translation Table. When my router receives responses, it will use the Address Translation Table to return the original port and IP address to the response TCP headers, ensuring my operating system can send data to <span className="text-[pink]">192.168.1.30</span>:<span className="text-[bisque]">59423</span> for the browser.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Stream Index, Conversation Completeness, TCP Segment Length</h3>
 Stream index, conversation completeness, and TCP segment length are calculated by Wireshark and are not in the TCP header.
@@ -389,9 +389,9 @@ The first three reserved bits are again for future use and always set to 0.
 
 The ECN-Echo and Congestion Window Reduced flags are used if there's network congestion. If a router experiences congestion and the ECN flag in the IP header is set to ECN-Capable, the router will set that flag to 11 (CE - Congestion Experienced), and forward the packet instead of dropping it. When the host receives the packet, it will detect the CE flag in the IP header and set the ECN-Echo flag in it's next TCP acknowledgement segment. When the sender receives the acknowledgement with the ECN-Echo flag set, it will set the Congestion Window Reduced flag in it's next segment to confirm it has reduced its <a href="#tcpwindow">window</a>. 
 
-This is an example of how, even though it's essential to minimise interaction between layers to maintain modularity and encapsulation, some controlled interactions are acceptable.
+Note here that TCP software (layer 4) is reading an IP header's ECN flag (layer 3). This is an example of how, even though it's essential to minimise interaction between layers to maintain modularity and encapsulation, some controlled interactions are acceptable.
 
-The Syn (Synchronise) and Ack (Acknowledgement) flags are are set as appropriate in the SYN &rarr; SYN ACK &rarr; ACK segments of the <a href="/blog/tls_handshake_in_depth">TLS Handshake</a>, where hosts are initialising their sequence and acknowledgement numbers.
+The Syn (Synchronise) and Ack (Acknowledgement) flags are are set as appropriate in the SYN &rarr; SYN ACK &rarr; ACK segments of the three way handshake, where hosts are initialising their sequence and acknowledgement numbers.
 
 To understand Push and Urgent flags, we need to understand the buffers that hosts maintain during a TCP connection. 
 
@@ -403,7 +403,7 @@ For efficiency, both buffers wait until a certain amount of data has built up to
 
 The Push flag tells the sender and receiver to process their data immediately. All data in the buffers are processed, and so data is still *sent in sequence*.
 
-The Urgent flag tells the sender and receiver to process only the data specified by the Urgent Pointer immediately. The rest of the buffer is unaffected and so the urgent data is *sent out of sequence*.
+The Urgent flag tells the sender and receiver to process only the data specified by the Urgent Pointer (explained below) immediately. The rest of the buffer is unaffected and so the urgent data is *sent out of sequence*.
 
 Reset and Fin are set to 1 to reset or terminate the connection, respectively.
 
@@ -411,9 +411,9 @@ Reset and Fin are set to 1 to reset or terminate the connection, respectively.
 The TCP window size, also known as the "receive window size" or "advertised window size", represents the amount of buffer space available at the receiver for incoming data. It indicates how much data the sender can transmit before needing an acknowledgment from the receiver.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Checksum</h3>
-The TCP checksum is calculated using the TCP header, the encapsulated data, and a pseudo-header containing the protocol and both IP addresses. This checksum is calculated using the same operations as the IP checksum.
+The TCP checksum is calculated using the TCP header, the encapsulated data, and a pseudo-header containing the protocol and both IP addresses. This checksum is calculated with the same operations used to calculate the <a href="#ipchecksum">IP checksum</a> explained previously.
 
-Because the IP addresses are needed for the pseudo-header, the layer 4 TCP software of a network stack must access information from the layer 3 IP header. This is another example of controlled interactions between network layers.
+Because the IP addresses are needed for the pseudo-header in this calculation, the layer 4 TCP software of a network stack must access information from the layer 3 IP header. This is another example of controlled interactions between network layers.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Urgent Pointer</h3>
 The urgent pointer indicates the offset in bytes from the current sequence number to the end of the urgent data discussed in the <a href="tcpflags">TCP flags</a> section.
@@ -425,11 +425,11 @@ Maximum Segment Size is the largest TCP segment size (in bytes) the sender can r
 
 The Window Scale option allows for larger window sizes than the standard 16-bit <a href="tcpwindow">Window</a> field can accommodate. By shifting the 16-bit base Window value to the left, we can raise the window size to powers of 2.
 
-In our example, the 16-bit base Window size is 11111010 11110000 (64,240 in decimal, so 64,240 bytes). Our Window Scale shift count is 8, so we shift bits 8 to the left: 
+In our example, the 16-bit base Window size is 11111010 11110000 (64,240 in decimal, so 64,240 bytes). Our Window Scale shift count is 8, so we shift bits 8 positions to the left: 
 
 ```yaml
 00000000 11111010 11110000 (6,420)
-   <-       <-       <-    shift left by 8 bits
+   <-       <-       <-    shift left 8 positions
 11111010 11110000 00000000 (16,777,215)
 ```
 
