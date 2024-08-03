@@ -54,7 +54,7 @@ Now, we're looking at the hexadecimal dump of the same packet.
 
 The four digit numbers on the left are again the offsets. Because the actual data is now displayed in hexadecimal, twice as many bytes fit on a single line. Consequenty, you can see the offsets increment by 16 bytes instead of 8 bytes: 0010 (16), 0020 (32), 0030 (48), and so on.
 
-At the end of each row, we can see the corresponding ASCII characters for the bytes in that row, if they're printable. This is to allow us to quickly see any readable text in a packet. SYN packets don't generally contain readable text, but take a look at the ASCII from a later packet:
+At the end of each line, we can see the corresponding ASCII characters for the bytes in that line, if they're printable. This is to allow us to quickly see any readable text in a packet. SYN packets don't generally contain readable text, but take a look at the ASCII from a later packet:
 
 ```yaml /www.mathewk/ /ennedy.com/ /77 77 77 2e 6d 61 74 68 65 77 6b/ /65 6e 6e 65 64 79 2e 63 6f 6d/
 06d0   17 00 2b 00 07 06 5a 5a 03 04 03 03 00 00 00 1a   ..+...ZZ........
@@ -215,7 +215,7 @@ If a packet is fragmented, the total length field is also used in the reassembly
 As mentioned above, if a packet is larger than the Maximum Transmission Unit of the receiving device, it is split into fragments. Each fragment's own IP header contains the same 16-bit "Identification" field value. Receiving hosts use this field to identify which fragments belong to the same original packet. Fragmentation is less common now, as modern systems send probing packets to determine the smallest MTU along the path to a destination. This is called the "Path MTU", and once it's discovered, the system can adjust packet size accordingly to prevent fragmentation.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Flags</h3>
-These three bits are used for fragmentation information.
+These bits are used for fragmentation information.
 - The first bit is always 0. It's called the reserved bit as it's reserved for future use.
 - The second bit is the "Don't Fragment" (DF) bit. If this is set to 1, the packet should not be fragmented.
 - The third bit is the "More Fragments" (MF) bit. This indicates whether there are more fragments to come for a given packet. It's set to 1 in all fragments with the same indentification value except the last.
@@ -256,15 +256,15 @@ The receiving device recalculates the checksum and compares it to the one in thi
 In our case, 0x0000 indicates that validation is disabled. This is due to "checksum offloading", where the Network Interface Controller hardware handles validation.
 
 <h3 id="source_destination_ip" className="text-[navy] dark:text-[skyblue]">Source and Destination IP Addresses</h3>
-At the end of the IP header, we have the source and destination IP addresses. Where MAC addresses facilitated "hop to hop" communication, IP addresses facilitate "end to end" communication.
+At the end of the IP header, we have the source and destination IP addresses. These addresses identify hosts, or end devices, on a network. While MAC addresses facilitate 'hop to hop' communication, IP addresses facilitate 'host to host' communication.
 
 Here, the desination address is the *public IP address* for one of my servers.
 
-The source address is a *private IP address* assigned to my computer by my home router. Private IP addresses are not used on the public internet, as they're not unique. When my router processes this packet, it will replace the private source IP address in the IP header with its own unique public IP address using Network Address Translation (NAT), more specifically Port Address Translation (PAT). It keeps track of this change in an Address Translation Table. When my server responds with packets, the destination IP address in the IP headers will be my router's public IP address, and my router will use the Address Translation Table to change the destination IP address to my computer's private IP address before sending it to my computer's NIC.
+The source address is a *private IP address* assigned to my computer by my home router. Private IP addresses are not used on the public internet, as they're not unique. When my router processes this packet, it will replace the private source IP address in the IP header with its own unique public IP address using Network Address Translation (NAT), more specifically Port Address Translation (PAT). It keeps track of this change in an Address Translation Table. When my server responds with packets, the destination IP address in the IP headers will be my router's public IP address. My router will use the Address Translation Table to change the destination IP address to my computer's private IP address before sending it to my computer's NIC.
 
 PAT allows all devices in a local network to use the same public IP, conserving unique IPv4 addresses. IPv6 is slowly replacing IPv4, and IPv6 addresses won't run out - they're 128 bits long, so we've got 2<sup>128</sup> (340 undecillion) of those.
 
-PAT also changes port numbers in the TCP header (which we'll look at next) in order to keep unique mappings in the router's Address Translation Table.
+PAT also changes port numbers in the TCP header at layer 4 (which we'll look at next) in order to keep unique mappings in the router's Address Translation Table.
 
 ## TCP Header (Layer 4)
 
@@ -285,14 +285,14 @@ Here's Wireshark's packet diagram for the TCP header.
 This header contains:
 - Source port (2 bytes)
 - Destination port (2 bytes)
-- Sequence number
-- Acknowledgement number
-- Header length
-- Flags
-- Window
-- Checksum
-- Urgent pointer
-- TCP options
+- Sequence number (4 bytes)
+- Acknowledgement number (4 bytes)
+- Header length (4 bits)
+- Flags (12 bits)
+- Window (2 bytes)
+- Checksum (2 bytes)
+- Urgent pointer (2 bytes)
+- TCP options (4 bytes)
 
 Here's how the packet details pane displays the header:
 
@@ -351,7 +351,7 @@ Transmission Control Protocol, Src Port: 59423, Dst Port: 443, Seq: 0, Len: 0
 ```
 
 <h3 className="text-[navy] dark:text-[skyblue]">Source and Destination Ports</h3>
-Where MAC addresses facilitate "hop to hop" communication, and IP addresses facilitate "end to end" communication, ports facilitate what we might call "service to service" communication.
+Where MAC addresses facilitate "hop to hop" communication, and IP addresses facilitate "host to host" communication, ports facilitate what we might call "service to service" communication.
 
 If you're using a browser and Slack desktop at the same time, all requests sent by both of these services will have the same source MAC address in their layer 2 header, and the same source IP address in their layer 3 header. Port numbers here at layer 4 differentiate connections. 
 
@@ -359,7 +359,7 @@ In our example above, the source port is 59423. My browser process used the Wind
 
 The destination port is port 443. Upon processing this TCP header, my server's operating system will pass the encapsulated data to whichever software is "listening" for incoming connections on the socket <span className="text-[pink]">35.178.194.78</span>:<span className="text-[bisque]">443</span>, which in this case is an nginx web server.
 
-As mentioned above in the section on <a href="#source_destination_ip">Source and Destination IP Addresses</a>, as part of Port Address Translation, the source ports in this header will be replaced by your router. When the router receives responses, it will use its Address Translation Table to return the original source port to the header, ensuring your operating system can send data to port 59423 for the browser.
+As mentioned above, my router changes the source port in outbound TCP headers as part of Port Address Translation. This ensures unique mappings between private and public IP addresses in the router's Address Translation Table. When my router receives responses, it will use the Address Translation Table to return the original port and IP address to the response TCP headers, ensuring my operating system can send data to port 59423 for the browser.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Stream Index, Conversation Completeness, TCP Segment Length</h3>
 Stream index, conversation completeness, and TCP segment length are calculated by Wireshark and are not in the TCP header.
@@ -435,7 +435,7 @@ In our example, the 16-bit base Window size is 11111010 11110000 (64,240 in deci
 
 This is the equivalent of multiplying our base Window value by 256.
 
-The SACK permitted option stands for "Selective Acknowledgement". Without this option, TCP uses "Cumulative Acknowledgement" as described in the <a href="#tcp_sequence_acknowledgement">Sequence Number and Acknowledgement Number</a> section. Cumulative acknowledgement essentially says "I've received everything up to this point". This means that if a packet is lost and resent out of sequence for any reason, the receiver will send an acknowledgement for that packet, and the sender will retransmit all data that followed the lost packet, even if it's already been received.
+The SACK permitted option means "Selective Acknowledgement" is permitted. Without this option, TCP uses "Cumulative Acknowledgement" as described in the <a href="#tcp_sequence_acknowledgement">Sequence Number and Acknowledgement Number</a> section. Cumulative acknowledgement essentially says "I've received everything up to this point". This means that if a packet is lost and resent out of sequence for any reason, the receiver will send an acknowledgement for that packet, and the sender will retransmit all data that followed the lost packet, even if it's already been received.
 
 SACK permitted, when set in the initial SYN packet of a three way handshake, is allowing the receiver to modify it's acknowledgement field to acknowledge data out of sequence to avoid this unecessary retransmission.
 
