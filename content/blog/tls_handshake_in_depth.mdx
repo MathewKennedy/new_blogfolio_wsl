@@ -6,13 +6,102 @@ tags: ["networking", "wireshark", "tls"]
 published: true
 ---
 
-## The TLS Handshake
+## The TLS Handshake 1.2
 
-- Credit to practical networking
+- Note that 1.3 used now, see second section for changes
 
-- Steps as in video at https://www.youtube.com/watch?v=ZkL10eoG1PY but with examples
+- Credit to practical networking, link to site and call it stunning: https://www.practicalnetworking.net/ Highly advise looking there for variations on the handshake and in cipher suites.
+
+- This all happens every time you connect to a HTTPS website or connect to an SSL VPN. 
+
+- Steps as in video at https://www.youtube.com/watch?v=ZkL10eoG1PY but with text from Wireshark
+
+### Client Hello and Server Hello
+Talk about these together as they have the same fields. Show different code blocks for each from Wireshark.
+
+### Certificate Record and Server Hello Done
+First mention 3 files on server and talk about certificate authority that gives them. How these are validated is discussed in next section.
+
+Show apache config that shows paths to three certs, when server starts it reads these configs to know where certificate chain is.
+
+Mention and link to certbot for getting certificates 🤖📜
+
+### Client Key Exchange
+Explain how certificate chain works in detail, more than Ed (how we walk up the issuer to get back to main authority).
+
+Client checks if certificate is valid and if it belongs to server it's talking with. Does this by sending client key exchange, which also allows it to send mutual seed value for generating keys.
+
+Steps:
+- Client sends Pre Master which is 2 bytes for TLS version and 46 random bytes.
+- This is encrypted by the client with the servers public key before sending
+- Only person who can extract pre master secret from encrypted version is server with the matching private key
+- Both have pre master secret now to use as seed value for keys. RSA does the above but other protocols do this differently
+
+### Master Secret
+Both sides generate the master secret with the pre master secret. Pre master secret, the string "master secret" and both client and server random numbers are put into a PRF (pseudo random function) to make the master secret. Both parties have it now.
+
+Pseudo random function is a hashing algorithm that gives a digest of any length you want. You can also feed outputs back into the algorithm as many times as you need to calculate as many secrets as you need. Only people with the values above can run the PRF that many times to get all the secrets needed in the suite.
+
+### Generating Session Keys
+The master secret, the string "key expansion" and the client and server random are now put into a pseudo random function (PRF) by both parties to generate the same 4 keys.
+
+They'll both have:
+- A symmetric encryption key for data sent by client
+- A symmetric encryption key for data sent by server
+- An HMAC key for server (look up and explain)
+- An HMAC key for client (look up and explain)
+
+This step also generates IVs or "Initialisation vectors", required by certain encryption protocols that can be chosen in the cipher suit lists of clients and servers - look into what they are and explain.
+
+Two separate keys means that if one set of keys is compromised, only traffic in one direction can be read. The terminology for this is there are two separate "tunnels".
+---
+The following steps validate the keys the client and the server now have.
+
+### Client Change Cipher Spec
+Indication by client it has everything it needs to speak securely. "Ready to change to cipher specified in hello". This is not a handshake record.
+
+### Client Handshake Finished
+This is a handshake record to prove client has correct keys. It does this by sending an "Ecrypted Verification", which uses the encryption key to hash all handshake records so far (so not including Change Cipher Spec):
+- Client Hello
+- Server Hello
+- Certificate
+- Server Hello Done
+- Client Key Exchange
+
+All content of each is hashed, then combined with Master Secret and "client finished" string, in a PRF pseudo random function to create the verification data. Verification data is then encrypted with client session keys to create Encrypted Verification, which is sent to server.
+
+### Server Change Cipher Spec
+Indication by client it has everything it needs to speak securely. "Ready to change to cipher specified in hello". This is not a handshake record.
+
+### Server Handshake Finished
+Server has all same information as above, so it copies this process, decrypts the clients version with client session keys, and compares the results. If they're the same, server knows client has right keys. This also confirms that server and client saw all the same handshake records, so nothing tampered with. Client doesn't know server has correct keys are that it saw same records yet, so whole process is done other way round. When the server hashes all of the records seen so far, it includes the new record the client just sent (client finished), so server is hashing an extra record. The string is also "server finished" instead of "client finished".
+
+Handshake finished.
 
 ---
 ## Changes in TLS 1.3
 
-- As per video
+- Understand the TLS 1.2 is 2 round trips. Client sends hello and receives server hello, certificate, and done. These four records are one round trip. Client sends keys and finished, server responds in kind. This is second round trip.
+- This is a 2 round trip time handshake, or 2RTT.
+
+- Client hello is same, from here different
+- Server hello, server extensions, certificate, cert. verify, and finished, all encrypted.
+- from this point server can send application data if needed, although it's uncommon as it doesn't know what to send yet.
+
+- client sends finished encrypted. Client can send application data at this point too.
+
+This is a single round trip or 1RTT handshake. This reduces what's called the "time to first byte" (meaning round trips before the first byte of actual requested data is received) by a round trip.
+
+This is important as with each request, there'll need to be DNS, TCP (three way handshake), TLS, and then the HTTP request.
+
+The client can actually send encrypted application data (actual request data) in it's hello called "Early data". This has risks but can reduce TLS 1.3 to zero rounds trips to first byte.
+
+## Encrypred SNI
+
+This is when client sends encrypted Server Name Indication in its hello. This lets a server that hosts multiple domains with different certificates to know which certificate to send to the client. This was done in 1.2 but not encrypted. No one can know from the wire which website is being requested.
+
+continue from 8:20 in https://www.youtube.com/watch?v=JA0vaIb4158
+
+
+
+
