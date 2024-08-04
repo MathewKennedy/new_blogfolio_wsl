@@ -10,9 +10,9 @@ published: true
 
 ## The Binary Dump
 
-```yaml /10001100 11100101 11101111 10000001 11010000 00011010 11110000 01010111/#b /10100110 10011010 11000111 10110110 00001000 00000000/#b /01000101 00000000/#p /00000000 00110100 01011010 00101001 01000000 00000000 10000000 00000110/#p /00000000 00000000 11000000 10101000 00000001 00011110 00100011 10110010/#p /11000010 01001110/#p /11101000 00011111 00000001 10111011 11101101 10001100/#y /01100101 11111011 00000000 00000000 00000000 00000000 10000000 00000010/#y /11111010 11110000 10100111 11101101 00000000 00000000 00000010 00000100/#y /00000101 10110100 00000001 00000011 00000011 00001000 00000001 00000001/#y /00000100 00000010/#y
-0000  10001100 11100101 11101111 10000001 11010000 00011010 11110000 01010111 
-0008  10100110 10011010 11000111 10110110 00001000 0000000001000101 00000000
+```yaml /10001010 10100101 10101010 10000000 10100000 00011010 10100000 01010111/#b /10100110 10011010 10101010 10101010 00001000 00000000/#b /01000101 00000000/#p /00000000 00110100 01011010 00101001 01000000 00000000 10000000 00000110/#p /00000000 00000000 11000000 10101000 00000001 00011110 00100011 10110010/#p /11000010 01001110/#p /11101000 00011111 00000001 10111011 11101101 10001100/#y /01100101 11111011 00000000 00000000 00000000 00000000 10000000 00000010/#y /11111010 11110000 10100111 11101101 00000000 00000000 00000010 00000100/#y /00000101 10110100 00000001 00000011 00000011 00001000 00000001 00000001/#y /00000100 00000010/#y
+0000  10001010 10100101 10101010 10000000 10100000 00011010 10100000 01010111 
+0008  10100110 10011010 10101010 10101010 00001000 0000000001000101 00000000
 0010  00000000 00110100 01011010 00101001 01000000 00000000 10000000 00000110 
 0018  00000000 00000000 11000000 10101000 00000001 00011110 00100011 10110010
 0020  11000010 0100111011101000 00011111 00000001 10111011 11101101 10001100
@@ -42,12 +42,12 @@ Let's look at the equivalent hexadecimal dump before examining each layer of the
 
 ## The Hexadecimal Dump
 
-```yaml /8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00/#b /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p /e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02/#y /fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01/#y /04 02/#y
-0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 0045 00   .......W......E.
-0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
-0020   c2 4ee8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
-0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01   ................
-0040   04 02                                             ..
+```yaml /8a a5 aa 80 a0 1a a0 57 a6 9a aa aa 08 00/#b /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p /e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02/#y /fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01/#y /04 02/#y
+0000   8a a5 aa 80 a0 1a a0 57 a6 9a aa aa 08 0045 00   ·······W······E·
+0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   ·4Z)@·········#·
+0020   c2 4ee8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   ·N······e·······
+0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01   ················
+0040   04 02                                             ··
 ```
 
 Now, we're looking at the hexadecimal dump of the same packet.
@@ -57,10 +57,10 @@ The four digit numbers on the left are again the offsets. Because the actual dat
 At the end of each line, we can see the corresponding ASCII characters for the bytes in that line, if they're printable. This is to allow us to quickly see any readable text in a packet. SYN packets don't generally contain readable text, but take a look at the ASCII from a later packet:
 
 ```yaml /www.mathewk/ /ennedy.com/ /77 77 77 2e 6d 61 74 68 65 77 6b/ /65 6e 6e 65 64 79 2e 63 6f 6d/
-06d0   17 00 2b 00 07 06 5a 5a 03 04 03 03 00 00 00 1a   ..+...ZZ........
-06e0   00 18 00 00 15 77 77 77 2e 6d 61 74 68 65 77 6b   .....www.mathewk
-06f0   65 6e 6e 65 64 79 2e 63 6f 6d 44 69 00 05 00 03   ennedy.comDi....
-0700   02 68 32 00 12 00 00 00 05 00 05 01 00 00 00 00   .h2.............
+06d0   17 00 2b 00 07 06 5a 5a 03 04 03 03 00 00 00 1a   ··+···ZZ········
+06e0   00 18 00 00 15 77 77 77 2e 6d 61 74 68 65 77 6b   ·····www.mathewk
+06f0   65 6e 6e 65 64 79 2e 63 6f 6d 44 69 00 05 00 03   ennedy.comDi····
+0700   02 68 32 00 12 00 00 00 05 00 05 01 00 00 00 00   ·h2·············
 ```
 The ASCII makes it a lot easier to identify certain parts of the packet, such as the server_name extension in the client hello above.
 
@@ -72,11 +72,11 @@ We're going to use two of Wireshark's panes to help us understand the content of
 
 These are the 14 bytes in the Ethernet II header of our original packet:
 
-```yaml /8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00/#b /.......W....../#b
-0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 0045 00   .......W......E.
-0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
-0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
-0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01   ................
+```yaml /8a a5 aa 80 a0 1a a0 57 a6 9a aa aa 08 00/#b /·······W······/#b
+0000   8a a5 aa 80 a0 1a a0 57 a6 9a aa aa 08 0045 00   ·······W······E·
+0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   ·4Z)@·········#·
+0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   ·N······e·······
+0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01   ················
 0040   04 02
 ```  
 
@@ -92,13 +92,13 @@ The diagram is 32 bits (4 bytes) wide, zero-indexed. We can see from the rows th
 Here's how the packet detail pane displays this information:
 
 ```yaml
-Ethernet II, Src: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa), Dst: HuaweiTe_80:a0:1a (8a:a5:aa:80:a0:1a)
+Ethernet II, Src: IntelCor_9a:aa:aa (a0:57:a6:9a:aa:aa), Dst: HuaweiTe_80:a0:1a (8a:a5:aa:80:a0:1a)
     Destination: HuaweiTe_80:a0:1a (8a:a5:aa:80:a0:1a)
         Address: HuaweiTe_80:a0:1a (8a:a5:aa:80:a0:1a)
         .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
         .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
-    Source: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa)
-        Address: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa)
+    Source: IntelCor_9a:aa:aa (a0:57:a6:9a:aa:aa)
+        Address: IntelCor_9a:aa:aa (a0:57:a6:9a:aa:aa)
         .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
         .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
     Type: IPv4 (0x0800)
@@ -107,8 +107,6 @@ Ethernet II, Src: IntelCor_9a:aa:aa (a0:aa:a6:9a:aa:aa), Dst: HuaweiTe_80:a0:1a 
 MAC addresses are assigned to a Network Interface Controller (NIC) to give that NIC a unique address within a network. They facilitate the "hop to hop" communication between the two devices a packet is currently being passed to and from. In this case the destination MAC address belongs to a NIC in my home router, and the source MAC address belongs to a NIC in my computer.
 
 Devices can have multiple network interface controllers, some physical and some virtual, each with their own MAC address, meaning a single device often uses multiple MAC addresses for network communications. For example, your computer might have different NICs for WiFi, wired Ethernet, Bluetooth, and virtual private network (VPN) connections.
-
-See my post on [How Routers Communicate](/blog/how_routers_communicate) for way more detail.
 
 <h3 id="hello" className="text-[navy] dark:text-[skyblue]">LG / IG Bits</h3>
 The LG (Local/Global) bit is the second least significant bit (the second bit from the right) of the most significant byte (the first byte on the left) of the MAC address. It indicates whether the MAC address is locally administered (1) or globally unique (0). 
@@ -119,7 +117,7 @@ The IG (Individual/Group) bit is the least significant bit (the first bit on the
 
 In this case both MAC addresses are unicast.
 
-- Unicast MAC addresses are are used for communication between a single sender and a single receiver. 
+- Unicast MAC addresses are used for communication between a single sender and a single receiver. 
 - Multicast MAC addresses are used for communication between a single sender and multiple specific receivers. Devices that want to receive multicast traffic must join a multicast group.
 - The broadcast MAC address FF:FF:FF:FF:FF:FF is used for communication between a single sender and all devices on the network.
 
@@ -137,11 +135,11 @@ Let's move on to examine that layer 3 IPv4 header.
 
 These are the 20 bytes in the IP header of our original packet:
 
-```yaml /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p /E./#p /.4Z)@.........#./#p /.N/#p
-0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00 45 00   .......W......E.
-0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
-0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   .N......e.......
-0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01    ................
+```yaml /45 00/#p /00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2/#p /c2 4e/#p /E·/#p /·4Z)@·········#·/#p /·N/#p
+0000   8a a5 aa 80 a0 1a a0 57 a6 9a aa aa 08 00 45 00   ·······W······E·
+0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   ·4Z)@·········#·
+0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02   ·N······e·······
+0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01    ················
 0040   04 02
 ```
 
@@ -198,7 +196,7 @@ The first 6 bits are the Differentiated Services Codepoint (DSCP), which indicat
 
 <h3 className="text-[navy] dark:text-[skyblue]">Explicit Congestion Notification</h3>
 
-The next 2 bits are used for Explicit Congestion Notification (ECN). Historically, when a router's queue filled up due to congestion, it started to drop packets, which served as an *implicit* signal to the sender that there was network congestion. The 2 ECN bits allow the endpoints to send explicit notifications of congestion without relying on packet dropping. In this context, our 2 bits are set to 00, which indicates that this traffic is not capable of using ECN. This can be due to the settings in the software application being used. The possibe values for these bits are:
+The next 2 bits are used for Explicit Congestion Notification (ECN). Historically, when a router's queue filled up due to congestion, it started to drop packets, which served as an *implicit* signal to the sender that there was network congestion. The 2 ECN bits allow the endpoints to send explicit notifications of congestion without relying on packet dropping. In this example, our 2 bits are set to 00, which indicates that this traffic is not capable of using ECN. This can be due to the settings in the software application being used. The possibe values for these bits are:
 - 00: Not ECN-Capable Transport (Non-ECT)
 - 01: ECN-Capable Transport (ECT(1))
 - 10: ECN-Capable Transport (ECT(0))
@@ -271,7 +269,7 @@ PAT also changes port numbers in the TCP header at layer 4 (which we'll look at 
 These are the 32 bytes in our TCP header:
 
 ```yaml /e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02/#y /......e......./#y /fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01/#y /................/#y /04 02/#y /.. /#y
-0000   8c e5 ef 81 d0 1a f0 57 a6 9a c7 b6 08 00 45 00   .......W......E.
+0000   8a a5 aa 80 a0 1a a0 57 a6 9a aa aa 08 00 45 00   .......W......E.
 0010   00 34 5a 29 40 00 80 06 00 00 c0 a8 01 1e 23 b2   .4Z)@.........#.
 0020   c2 4e e8 1f 01 bb ed 8c 65 fb 00 00 00 00 80 02  .N......e.......
 0030   fa f0 a7 ed 00 00 02 04 05 b4 01 03 03 08 01 01  ................
