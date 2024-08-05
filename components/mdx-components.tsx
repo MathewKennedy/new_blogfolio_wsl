@@ -2,6 +2,7 @@ import * as runtime from "react/jsx-runtime";
 import Image from "next/image"
 import React from "react";
 import { Callout } from "./callout";
+import { AnimatedPhone } from "./animated-phone";
 
 // function to take in a string of code and convert it to a JS function using Function(code)
 // it then calls that function with the imported runtime as it's context
@@ -13,7 +14,8 @@ const useMDXComponent = (code: string) => {
 
 const components = {
     Image,
-    Callout
+    Callout,
+    AnimatedPhone
 }
 
 interface MdxProps {
