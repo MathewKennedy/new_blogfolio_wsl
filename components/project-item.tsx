@@ -61,7 +61,7 @@ export function ProjectItem({slug, title, description, projectImage, date, tags}
                         {title}
                     </Link>    
                 </h5>
-                <div className="flex gap-2 mb-3">
+                <div className="flex gap-2 mb-3 overflow-x-scroll no-scrollbars">
                     {tags?.map((tag) => (
                             <Tag tag={tag} key={tag} type="project-item"/>
                         )

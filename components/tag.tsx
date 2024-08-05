@@ -22,7 +22,7 @@ export function Tag({ tag, current, count, type} : TagProps){
     return (
         <Link 
             href={`${pathPrefix}${slug(tag)}`}
-            className={badgeVariants({ variant: type == "project-item" ? (current ? "default" : "pink") : (current ? "default" : "teal"), className: "no-underline" })}
+            className={badgeVariants({ variant: type == "project-item" ? (current ? "default" : "pink") : (current ? "default" : "teal"), className: "no-underline" }) + " text-nowrap"}
         >
             {tag} {count ? `(${count})` : null}
         </Link>

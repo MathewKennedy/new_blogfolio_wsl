@@ -1,26 +1,14 @@
 ---
 title: Luisa Brito
-description: Global Design Lead portfolio
+description: A Design Portfolio
 project_image: /images/projects/luisa_portfolio/card_image.png
 date: 2024-07-30
 published: true
-tags: ["nextjs", "react", "aws", "nginx"]
+tags: ["nextjs", "react", "aws", "nginx", "shadcn/ui"]
 ---
 
 <div className="grid grid-cols-1 md:grid-cols-2">
-    <div id="phone-outer-container" className="scale-[1.4] md:scale-[1]">
-        <div id="image-container">
-            <div id="phone-depth"></div>
-            <div id="phone">
-                <div id="phone-camera-area">
-                    <div id="phone-camera"></div>
-                </div>
-                <div id="phone-screen">
-                    <div className="shine"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <AnimatedPhone screenBackgroundImage="/images/projects/luisa_portfolio/animated_mobile.png" navBackgroundImage="/images/projects/luisa_portfolio/animated_mobile_nav.png"/>
     <div>
         <h3>Project Information</h3>
         <ul>
@@ -33,16 +21,18 @@ tags: ["nextjs", "react", "aws", "nginx"]
 </div>
 
 ## Project Overview
-**Luisa Brito's Portfolio** is a full-stack NextJS design portfolio. It allows Luisa to add new projects easily, specifying custom grids. The website was built according to Figma designs with a focus on simplicity, image optimisation, and accessibility.
+**Luisa Brito's Portfolio** is a full-stack NextJS design portfolio. Luisa is Global Brand and Creative Strategy Design Manager at BCG. This portfolio is scalable and modular, and allows Luisa to add new projects easily, specifying custom grids of images and videos. The website was built according to the Figma designs as below, with a focus on simplicity, accessibility, and core web vital metrics - A lot of large, high quality media was involved, which was optimised to speed up the largest contentful paint, reduce the first input delay, and avoid cumulative layout shift. 
 
 ### Key Features
-- **User Interaction:** Luisa can upload new projects without further development, specifying custom grids and line breaks.
+- **Auth:** A password from Luisa's CV (or my own CV) is required to view the portfolio, as it includes corporate projects.
+- **Client Updatability:** Luisa can upload new projects and blogs, specifying custom grids and line breaks without further development.
+- **Image Optimisation:** I optimised large, high quality images without visible loss, converting them to webp and using Next's image component for blur data.
 
 ### Technologies Used
-- **Frontend:** NextJS/React, Tailwind CSS, shadcnui
-- **Backend:** NextJS
+- **Frontend:** NextJS/React, Tailwind CSS, shadcn/ui
+- **Backend:** NextJS 14 Pages API
 - **Deployment:** AWS EC2 Ubuntu instance running NGINX
 
----
+<br/>
 
-Visit the project at [luisabrito.com](https://luisabrito.com) to explore Luisa's work!
+🔗 Visit the project at [luisabrito.com](https://luisabrito.com) to explore Luisa's work!

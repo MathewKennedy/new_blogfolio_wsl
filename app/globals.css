@@ -78,6 +78,7 @@
 /* animated phone */
 
 #phone-outer-container {
+  font-size: 1.375rem;
   width: 100%;
   display: grid;
   place-items: center;
@@ -89,18 +90,18 @@
   place-items: center;
   width: auto;
   height: auto;
-  margin: 3rem auto;
+  margin: 3em auto;
 }
 
 #phone-depth {
   box-sizing: content-box;
   position: absolute;
-  height: 12rem;
+  height: 12em;
   /* left: 12rem; */
-  transform: translateX(-1rem);
-  width: 4rem;
+  transform: translateX(-1em);
+  width: 4em;
   background-color: midnightblue;
-  border-radius: 0.6rem;
+  border-radius: 0.6em;
   animation: depth-turn 8s ease-in-out infinite;
 }
 
@@ -110,21 +111,29 @@
   place-items: center;
   box-sizing: content-box;
   position: relative;
-  height: 12rem;
-  width: 6rem;
+  height: 12em;
+  width: 6em;
   background-color: steelblue;
-  border-radius: 0.6rem;
+  border-radius: 0.6em;
   transition: background-color;
   animation: turn 8s ease-in-out infinite;
 }
 
+#animated-phone-nav {
+  position: absolute;
+  height: 12em;
+  width: 6em;
+  background-position: top;
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
 #phone-screen {
   position: absolute;
-  height: 12rem;
-  width: 6rem;
+  height: 12em;
+  width: 6em;
   overflow: hidden;
-  border-radius: 0.6rem;
-  background-image: url("/images/projects/novel/animated_mobile.png");
+  border-radius: 0.6em;
   background-position: top;
   background-size: 100%;
   background-repeat: no-repeat;
@@ -137,11 +146,11 @@
   position: absolute;
   display: grid;
   place-items: center;
-  width: 3rem;
-  height: .5rem;
+  width: 3em;
+  height: .5em;
   background-color: steelblue;
-  border-bottom-right-radius: .3rem;
-  border-bottom-left-radius: .3rem;
+  border-bottom-right-radius: .3em;
+  border-bottom-left-radius: .3em;
   top: 0;
   margin: 0 auto;
   z-index: 20;
@@ -150,7 +159,7 @@
 #phone-camera {
   position: absolute;
   height: 2px;
-  width: 1rem;
+  width: 1em;
   border-radius: .4px;
   background-color: black;
 }
@@ -166,10 +175,10 @@
 
 .shine {
   position: absolute;
-  width: 2rem;
-  height: 15rem;
-  top: -1.5rem;
-  right: 8rem;
+  width: 2em;
+  height: 15em;
+  top: -1.5em;
+  right: 8em;
   transform: rotateZ(20deg);
   background-color: white;
   opacity: 0.08;
@@ -178,15 +187,15 @@
 
 @keyframes shine {
   0% {
-    left: -3rem;
+    left: -3em;
     opacity: 0.05;
   }
   50% {
-    left: 8rem;
+    left: 8em;
     opacity: 0.09;
   }
   100% {
-    left: -3rem;
+    left: -3em;
     opacity: 0.05;
   }
 }
@@ -228,8 +237,11 @@
 }
 
 @media only screen and (min-width: 768px){
+  #phone-outer-container {
+    font-size: 1rem;
+  }
   #image-container {
-    margin: 1rem auto;
+    margin: 1em auto;
   }
 }
 
@@ -250,4 +262,15 @@
 [data-chars-id="y"] {
   /* background-color: #BB990022 !important; */
   border-color: bisque;
+}
+
+/* utility for hiding scroll bars */
+
+.no-scrollbars::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbars {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
