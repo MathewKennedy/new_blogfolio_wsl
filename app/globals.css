@@ -139,7 +139,15 @@
   background-repeat: no-repeat;
   background-color: black;
   border: 2px solid steelblue;
-  animation: screen-swipe 4s ease-in-out alternate infinite;
+}
+
+/* phone screen animation classes */
+.y-scroll {
+  animation: screen-scroll 4s ease-in-out alternate infinite;
+}
+
+.x-scroll {
+  animation: screen-scroll 4s ease-in-out alternate infinite;
 }
 
 #phone-camera-area {
@@ -215,7 +223,7 @@
   }
 }
 
-@keyframes screen-swipe {
+@keyframes screen-scroll {
   0% {
     background-position: top;
   }
