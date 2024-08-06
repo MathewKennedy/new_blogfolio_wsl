@@ -238,16 +238,16 @@
     background-position: top;
   }
   40% {
-    background-position: top;
+    background-position: center;
   }
   60% {
-    background-position: top;
+    background-position: center;
   }
   80% {
-    background-position: top;
+    background-position: bottom;
   }
   100% {
-    background-position: top;
+    background-position: bottom;
   }
 }
 
