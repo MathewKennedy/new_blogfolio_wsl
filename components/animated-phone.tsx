@@ -11,7 +11,7 @@ export function AnimatedPhone({
 } : AnimatedPhoneProps){
     return (
         <div id="phone-outer-container">
-            <div id="image-container" className="scale-[1.4] md:scale-[1]">
+            <div id="image-container">
                 <div id="phone-depth"></div>
                 <div id="phone">
                     <div id="phone-camera-area">

@@ -101,6 +101,7 @@
   transform: translateX(-1em);
   width: 4em;
   background-color: midnightblue;
+  @apply dark:bg-[#8AC6F8] border-[blue];
   border-radius: 0.6em;
   animation: depth-turn 8s ease-in-out infinite;
 }
@@ -136,7 +137,8 @@
   border-radius: 0.6em;
   background-repeat: no-repeat;
   background-color: black;
-  border: 2px solid steelblue;
+  border: 2px solid;
+  @apply dark:border-[steelblue] border-[steelblue];
 }
 
 /* phone screen animation classes */
