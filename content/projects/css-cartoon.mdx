@@ -1,9 +1,36 @@
 ---
 title: Vanilla CSS Cartoon
-description: A website I built way back whilst learning CSS
+description: One of the first websites I built whilst learning CSS
 project_image: /images/projects/css_cartoon/card_image.png
 date: 2020-03-04
 published: true
 tags: ["html", "css", "javascript"]
 ---
 
+<div className="grid grid-cols-1 md:grid-cols-2">
+    <AnimatedPhone scrollHorizontal="yes" screenBackgroundImage="/images/projects/css_cartoon/card_image.png"/>
+    <div>
+        <h3>Project Information</h3>
+        <ul>
+            <li><strong>Category:</strong> Creative Coding</li>
+            <li><strong>Project Date:</strong> March 2020</li>
+            <li><strong>URL:</strong> <a href="https://www.mathewkennedy.com/css-portfolio" target="_blank" className="text-[green] dark:text-[lightgreen]">mathewkennedy.com/css-portfolio</a></li>
+        </ul>
+    </div>
+</div>
+
+## Project Overview
+**Vanilla CSS Cartoon** was an experiment built whilst I was first learning CSS and Javascript. On mobile and portrait screens, where the view isn't fixed to the center of the room but pans from left to right instead, I put in some perspective shifts and layout changes. I've written a blog post on some of the more challenging <a href="../blog/css_illustrations" target="_blank" className="text-[green] dark:text-[lightgreen]">CSS Illustrations</a>.
+
+### Key Features
+- **Responsive Perspective Shifts:** In portrait, when the narrow view moves from left to right, there are perspective shifts.
+- **Vanilla CSS Only:** All shapes and images were achieved using only vanilla CSS with the purpose of the challenge and learning.
+- **Javascript Interactivity:** As I was also beginning to learn Javascript at the time, I added interactivity with the animation.
+
+### Technologies Used
+- **Frontend:** HTML5, CSS3, Javascript
+- **Deployment:** AWS EC2 Ubuntu instance running Apache (LAMPP)
+
+<br/>
+
+🔗 Visit the project [here](https://www.mathewkennedy.com/css-portfolio).

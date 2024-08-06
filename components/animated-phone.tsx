@@ -17,21 +17,10 @@ export function AnimatedPhone({
                     <div id="phone-camera-area">
                         <div id="phone-camera"></div>
                     </div>
-                    {/* conditional for vertical scroll or horizontal scroll */}
-                    {
-                        scrollHorizontal && (
-                            <div id="phone-screen" className="x-scroll">Yar scroll hori</div>
-                        )    
-                    }
-                    {
-                        !scrollHorizontal && (
-                            <div id="phone-screen" className="y-scroll" style={{backgroundImage: "url(" + screenBackgroundImage + ")"}}>
-                                <div id="animated-phone-nav" style={{backgroundImage: "url(" + navBackgroundImage + ")"}}></div>
-                                <div className="shine">luisa brtio</div>
-                            </div>
-                        )
-                    }
-                    
+                    <div id="phone-screen" className={scrollHorizontal ? "x-scroll" : "y-scroll"} style={{backgroundImage: "url(" + screenBackgroundImage + ")"}}>
+                        <div id="animated-phone-nav" style={{backgroundImage: "url(" + navBackgroundImage + ")"}}></div>
+                        <div className="shine">luisa brtio</div>
+                    </div>                    
                 </div>
             </div>
         </div>

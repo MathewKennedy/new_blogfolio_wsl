@@ -134,8 +134,6 @@
   width: 6em;
   overflow: hidden;
   border-radius: 0.6em;
-  background-position: top;
-  background-size: 100%;
   background-repeat: no-repeat;
   background-color: black;
   border: 2px solid steelblue;
@@ -143,11 +141,15 @@
 
 /* phone screen animation classes */
 .y-scroll {
+  background-position: top;
+  background-size: 100%;
   animation: screen-scroll 4s ease-in-out alternate infinite;
 }
 
 .x-scroll {
-  animation: screen-scroll 4s ease-in-out alternate infinite;
+  background-position: left;
+  background-size: auto 100%;
+  animation: screen-swipe 4s ease-in-out alternate infinite;
 }
 
 #phone-camera-area {
@@ -241,6 +243,27 @@
   }
   100% {
     background-position: bottom;
+  }
+}
+
+@keyframes screen-swipe {
+  0% {
+    background-position: left;
+  }
+  20% {
+    background-position: left;
+  }
+  40% {
+    background-position: center;
+  }
+  60% {
+    background-position: center;
+  }
+  80% {
+    background-position: right;
+  }
+  100% {
+    background-position: right;
   }
 }
 
