@@ -152,6 +152,11 @@
   animation: screen-swipe 4s ease-in-out alternate infinite;
 }
 
+.no-phone-scroll {
+  background-position: top;
+  background-size: 100%;
+}
+
 #phone-camera-area {
   position: absolute;
   display: grid;
@@ -233,16 +238,16 @@
     background-position: top;
   }
   40% {
-    background-position: center;
+    background-position: top;
   }
   60% {
-    background-position: center;
+    background-position: top;
   }
   80% {
-    background-position: bottom;
+    background-position: top;
   }
   100% {
-    background-position: bottom;
+    background-position: top;
   }
 }
 

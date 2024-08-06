@@ -1,12 +1,12 @@
 interface AnimatedPhoneProps {
-    scrollHorizontal?:Boolean,
-    navBackgroundImage: String,
+    scrollDir?:String,
+    navBackgroundImage?: String,
     screenBackgroundImage: String
 }
 
 export function AnimatedPhone({
-    scrollHorizontal = false,
-    navBackgroundImage = "/images/projects/novel/animated_mobile_nav.png",
+    scrollDir = "",
+    navBackgroundImage = "",
     screenBackgroundImage = "/images/projects/novel/animated_mobile.png"
 } : AnimatedPhoneProps){
     return (
@@ -17,9 +17,9 @@ export function AnimatedPhone({
                     <div id="phone-camera-area">
                         <div id="phone-camera"></div>
                     </div>
-                    <div id="phone-screen" className={scrollHorizontal ? "x-scroll" : "y-scroll"} style={{backgroundImage: "url(" + screenBackgroundImage + ")"}}>
+                    <div id="phone-screen" className={scrollDir == "x" ? "x-scroll" : (scrollDir == "y" ? "y-scroll" : "no-phone-scroll")} style={{backgroundImage: "url(" + screenBackgroundImage + ")"}}>
                         <div id="animated-phone-nav" style={{backgroundImage: "url(" + navBackgroundImage + ")"}}></div>
-                        <div className="shine">luisa brtio</div>
+                        <div className="shine"></div>
                     </div>                    
                 </div>
             </div>
