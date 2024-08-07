@@ -7,7 +7,7 @@ Church Lane, Leytonstone, London, E11 1HG
 ---
 
 ### Professional Summary
-Full-stack developer with 3+ years of experience in building web applications with technologies both old and brand new. Proficient in front-end and back-end development, DevOps, and database management. Creative and passionate about creating efficient, scalable, and user-friendly solutions.
+Full-stack software engineer with 3+ years of experience in building web applications with technologies both old and brand new. Proficient in front-end and back-end development, DevOps, and database management. Creative and passionate about creating efficient, scalable, and user-friendly solutions.
 
 ---
 

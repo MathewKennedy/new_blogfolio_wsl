@@ -1,20 +1,15 @@
 import Link from "next/link";
-import { cn, sortPosts } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { PostItem } from "@/components/post-item";
 import { siteConfig } from "@/config/site";
-import { posts } from "#site/content";
 
 export default function Home() {
-
-  const latestPosts = sortPosts(posts).slice(0, 5);
   
   return (
-    <>
-      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:mt-10 lg:py-32">
+      <section className="space-y-6 pb-8 pt-6 mx-auto my-auto">
         <div className="container flex flex-col gap-4 text-center">
           <div className="flex flex-row justify-center">
-            <h1 className="py-2 text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-balance bg-clip-text text-transparent bg-gradient-to-r from-[#2e8694] to-[#942e53] dark:from-[#96fffa] dark:to-[#faacd4] mb-[1rem]">
+            <h1 className="py-2 text-5xl sm:text-7xl font-black text-balance bg-clip-text text-transparent bg-gradient-to-r from-[#2e8694] to-[#942e53] dark:from-[#96fffa] dark:to-[#faacd4] mb-[1rem]">
               blogfolio
             </h1>
           </div>
@@ -31,17 +26,5 @@ export default function Home() {
           </div>
         </div>
       </section>
-      {/* <section className="container max-w-4xl py-6 lg:py-10 flex flex-col space-y-6 mt-60">
-        <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-center">
-          Latest posts
-        </h2>
-        <ul className="flex flex-col">
-          {latestPosts.map(post => (
-          <li key={post.slug} className="first:border-t first:border-border">
-              <PostItem slug={post.slug} title={post.title} description={post.description} date={post.date} tags={post.tags}/>
-          </li>))}
-        </ul>
-      </section> */}
-    </>
   );
 }
