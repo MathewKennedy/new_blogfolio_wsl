@@ -1,9 +1,129 @@
 ---
-title: C Compilation Process
-description: Using g++ to understand the C compilation process
+title: C++ Compilation Process
+description: Using g++ to understand the C++ compilation process
 date: 2024-03-04
-tags: ["compilers", "c", "g++"]
+tags: ["compilers", "c++", "g++"]
 published: true
 ---
 
-- Copy from Obsidian learning notebook
+Understanding the C compilation process in more depth demystified important concepts for me early on - concepts such as preprocessing, intermediate representation, assemblers, and the linker (static and dynamic). It also helped me with debugging across various languages and environments.
+
+A huge thank you to Mike Shah, who I learned a large part of the following from.
+
+## GNU, GCC, and g++
+GNU is a free software project started in 1983 with the goal of creating a Unix-compatible operating system composed entirely of free software. It's a recursive acronym for "GNU's Not Unix".
+
+GCC is the GNU Compiler Collection.
+
+Compilers are typically divided into frontends and backends. Frontends are language-specific, and they generate an intermediate representation of source code that allows the backend to be shared across multiple languages. We'll explore both frontend and backend in detail.
+
+g++ is the frontend we'll be using. g++ will then hand over to the appropriate backend components from the GNU Compiler Collection.
+
+## Example Files
+
+To understand how object files, header files, and libraries fit into the compilation process, we'll use three example files:
+
+<span className="text-[green] dark:text-[lightgreen]">source.cpp</span> is an implementation:
+```c++
+// source.cpp
+int add(int a, int b)
+{
+        return a + b;
+}
+```
+<span className="text-[green] dark:text-[lightgreen]">source.hpp</span> is a header file containing function signatures, interfaces, etc:
+```c++
+// source.hpp
+int add(int a, int b);
+```
+<span className="text-[green] dark:text-[lightgreen]">main.cpp</span> is the entry point to our program
+```c++
+// main.cpp
+#include "source.hpp"
+int main()
+{
+	add(3, 2);
+	return 0;
+}
+```
+---
+
+# Frontend
+
+## The Preprocessor
+The preprocessor takes our .cpp files as inputs.
+
+It processes all of our #include, #define, #if directives. (Talk about libraries, header guards, and conditional compilation with examples.)
+
+we can view the `.i` file that the preprocessor will output with the `-E` flag:
+```bash
+g++ -E main.cpp
+```
+Output:
+```cli
+# 0 "main.cpp"
+# 0 "<built-in>"
+# 0 "<command-line>"
+# 1 "/usr/include/stdc-predef.h" 1 3 4
+# 0 "<command-line>" 2
+# 1 "main.cpp"
+
+# 1 "source.hpp" 1
+
+int add(int a, int b);
+# 3 "main.cpp" 2
+int main(){
+ std::cout << add(3,5) << std::endl;
+ return 0;
+}
+```
+The line `#include "source.hpp"` from our original `main.cpp` file has been replaced with the actual code from the `source.hpp` file.
+
+We can see above, though, that the definition of `add()` from `source.cpp` is not included in the preprocessor output - `source.cpp` isn't being brought in at all yet.
+
+So, when we remove the -E flag and try to actually compile `main.cpp` like this...
+
+```bash
+g++ main.cpp
+```
+
+We get an error:
+
+```bash
+/usr/bin/ld: /tmp/ccKQGsdB.o: in function `main':
+main.cpp:(.text+0x17): undefined reference to `add(int, int)'
+collect2: error: ld returned 1 exit status
+```
+
+Please note that this error is coming from `/usr/bin/ld`, which is the <a href="#linker">linker</a> discussed in the backend section later. We're looking at this error now to understand what <span  className="text-[green] dark:text-[lightgreen]">has</span> and <span className="text-[#880808] dark:text-[pink]">has not</span> been included in the preprocessor output.
+
+Notice that the error says <strong className="text-[brown] dark:text-[bisque]">undefined</strong> reference. The linker knows about `add()` from the <a href="#symbols">symbol</a> in the source.hpp file included by the preprocessor, however, there's no <strong className="text-[navy] dark:text-[skyblue]">definition.</strong>
+
+## Compiler
+Takes in .i file
+It can be seen as the bridge between the frontend and backend.
+It performs lexical, syntax, and semantic analysis on the preprocessed .i file before generating an intermediate representation code (IR) that backend can understand
+
+---
+
+# Backend
+
+## Compiler cont'd. - Optimization and Target-Specific Code Generation (hidden from the user)
+Optimises the intermediate representation given by the frontend and then gives target specific assembly.
+outputs intermediate representation source.s (Intermediate representation)
+outputs .s file
+
+## Assembler
+Takes in .s
+Outputs object files with source.o
+
+## Symbols <span id="symbols"></span>
+Explain symbols, and that .o files have symbol tables. These are resolved during linking, which means that order of files in linking matters. This is because the linker needs to have seen undefined symbols and be looking for their implementations in following files.
+
+## Static Linker
+Takes in .o files and resolves symbols (names of variables, functions, sections etc) in the .o file's symbol table with actual implementations in other .o files listed in command. Order matters.
+
+## Dynamic Linker
+Takes in .o files and links unresolved symbols in .o symbol table with shared (dynamic) libraries on the target system such as Windows .dll (dynamic-link libraries) files.
+outputs .exe
+

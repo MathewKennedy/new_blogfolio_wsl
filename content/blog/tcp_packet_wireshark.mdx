@@ -357,7 +357,7 @@ In our example above, the source port is 59423. My browser process used the Wind
 
 The destination port is port 443. Upon processing this TCP header, my server's operating system will pass the encapsulated data to whichever software is "listening" for incoming connections on the socket <span className="text-[pink]">35.178.194.78</span>:<span className="text-[bisque]">443</span>, which in this case is nginx (web server software).
 
-As mentioned above, my router changes the source port in outbound TCP headers as part of Port Address Translation. This ensures unique mappings between private and public IP addresses in the router's Address Translation Table. When my router receives responses, it will use the Address Translation Table to return the original port and IP address to the response TCP headers, ensuring my operating system can send data to <span className="text-[pink]">192.168.1.30</span>:<span className="text-[bisque]">59423</span> for the browser.
+As mentioned above, my router changes the source port in outbound TCP headers as part of Port Address Translation. This ensures a unique mapping between the private and public IP address in the router's Address Translation Table. When my router receives responses, it will use the Address Translation Table to return the original port and IP address to the response TCP headers, ensuring my operating system can send data to <span className="text-[pink]">192.168.1.30</span>:<span className="text-[bisque]">59423</span> for the browser.
 
 <h3 className="text-[navy] dark:text-[skyblue]">Stream Index, Conversation Completeness, TCP Segment Length</h3>
 Stream index, conversation completeness, and TCP segment length are calculated by Wireshark and are not in the TCP header.
@@ -433,8 +433,8 @@ In our example, the 16-bit base Window size is 11111010 11110000 (64,240 in deci
 
 This is the equivalent of multiplying our base Window value by 256.
 
-The SACK permitted option means "Selective Acknowledgement" is permitted. Without this option, TCP uses "Cumulative Acknowledgement" as described in the <a href="#tcp_sequence_acknowledgement">Sequence Number and Acknowledgement Number</a> section. Cumulative acknowledgement essentially says "I've received everything up to this point". This means that if a packet is lost and resent out of sequence for any reason, the receiver will send an acknowledgement for that packet, and the sender will retransmit all data that followed the lost packet, even if it's already been received.
+The SACK permitted option means "Selective Acknowledgement" is permitted. Without this option, TCP uses "Cumulative Acknowledgement" as described in the <a href="#tcp_sequence_acknowledgement">Sequence Number and Acknowledgement Number</a> section. Cumulative acknowledgement essentially says "I've received everything up to this point". This means that if a packet is lost and resent out of sequence for any reason, the receiver will send a late acknowledgement for that packet, and the sender will retransmit all data that followed the lost packet, even if it's already been received.
 
 SACK permitted, when set in the initial SYN packet of a three way handshake, is allowing the receiver to modify it's acknowledgement field to acknowledge data out of sequence to avoid this unecessary retransmission.
 
-The "No-Operation" options are 1 byte options used to "pad" the data so that all options are 32-bits in length. 32 bit options can be parsed more efficiently by modern software and hardware. This is why the IP and TCP Header Length fields also multiply 4-byte (32 bit) words.
+The "No-Operation" options are 1 byte options used to "pad" the data so that all options are 32-bits in length. 32 bit options can be parsed more efficiently by modern software and hardware. This is why the IP and TCP Header Length values also multiply 4-byte (32 bit) words.
