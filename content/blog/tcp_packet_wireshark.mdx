@@ -82,7 +82,7 @@ These are the 14 bytes in the Ethernet II header of our original packet:
 
 The packet diagram for Ethernet headers shows us what's in each byte:
 
-![`An ethernet header packet diagram`](/images/blog/http_packet_wireshark/ethernet_packet_diagram.png)
+![`An ethernet header packet diagram`](/images/blog/tcp_packet_wireshark/ethernet_packet_diagram.png)
 
 The diagram is 32 bits (4 bytes) wide, zero-indexed. We can see from the rows that the header contains:
 - The destination MAC address (6 bytes)
@@ -145,7 +145,7 @@ These are the 20 bytes in the IP header of our original packet:
 
 Again, let's consult Wireshark's packet diagram of an IPv4 header to see what it contains.
 
-![`An IP header packet diagram`](/images/blog/http_packet_wireshark/ip_packet_diagram.png)
+![`An IP header packet diagram`](/images/blog/tcp_packet_wireshark/ip_packet_diagram.png)
 
 This packet contains:
 - IP version and header length (1 byte)
@@ -278,7 +278,7 @@ These are the 32 bytes in our TCP header:
 
 Here's Wireshark's packet diagram for the TCP header.
 
-![](/images/blog/http_packet_wireshark/tcp_packet_diagram.png)
+![](/images/blog/tcp_packet_wireshark/tcp_packet_diagram.png)
 
 This header contains:
 - Source port (2 bytes)

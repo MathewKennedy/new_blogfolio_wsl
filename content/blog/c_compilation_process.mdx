@@ -6,84 +6,160 @@ tags: ["compilers", "c++", "g++"]
 published: true
 ---
 
-Understanding the C compilation process in more depth demystified important concepts for me early on - concepts such as preprocessing, intermediate representation, assemblers, and the linker (static and dynamic). It also helped me with debugging across various languages and environments.
-
-A huge thank you to Mike Shah, who I learned a large part of the following from.
+Understanding the C++ compilation process in more depth demystified important concepts for me early on - concepts such as preprocessing, intermediate representation, optimisation, assemblers, and the linker (static and dynamic). It also helped me with debugging across various languages and environments.
 
 ## GNU, GCC, and g++
 GNU is a free software project started in 1983 with the goal of creating a Unix-compatible operating system composed entirely of free software. It's a recursive acronym for "GNU's Not Unix".
 
 GCC is the GNU Compiler Collection.
 
-Compilers are typically divided into frontends and backends. Frontends are language-specific, and they generate an intermediate representation of source code that allows the backend to be shared across multiple languages. We'll explore both frontend and backend in detail.
+Compilers are typically divided into frontends and backends. Frontends are language-specific, and they generate a language-agnostic intermediate representation of source code that allows the backend to be shared across multiple languages. We'll explore both frontend and backend in detail.
 
-g++ is the frontend we'll be using. g++ will then hand over the intermediate representation to the appropriate backend components from the GNU Compiler Collection.
+g++ is the frontend we'll be using. g++ will then pipe the intermediate representation to the appropriate backend components from the GNU Compiler Collection.
 
 ## Example Files
 
-To understand how object files, header files, and libraries fit into the compilation process, we'll use three example files:
+To understand the compilation process, we'll use three example files:
 
 <span className="text-[green] dark:text-[lightgreen]">source.cpp</span> contains an implementation of an `add()` function:
 ```c++
-// source.cpp
-int add(int a, int b)
-{
-        return a + b;
-}
-```
-<span className="text-[green] dark:text-[lightgreen]">header.hpp</span> is a header file containing the <strong><a href="#symbols">symbol</a> for the `add()` function:</strong>:
-```c++
-// header.hpp
-int add(int a, int b);
-```
-<span className="text-[green] dark:text-[lightgreen]">main.cpp</span> contains the entry point to our program - the `main()` function.
-```c++
-// main.cpp
 #include "header.hpp"
-int main()
-{
-	add(3, 2);
-	return 0;
+int add(int a, int b) {
+  int sum = a + b;
+  if (sum > MAX_VALUE) {
+    return MAX_VALUE;
+  }
+  return sum;
 }
 ```
+<span className="text-[green] dark:text-[lightgreen]">header.hpp</span> is a header file containing a header guard, macros, and a declaration for the `add()` function (all explained in detail later):
+```c++
+#ifndef HEADER_HPP
+#define HEADER_HPP
+#define MAX_VALUE 100
+#define PI 3.14159
+int add(int a, int b);
+#endif // HEADER_HPP
+```
+<span className="text-[green] dark:text-[lightgreen]">main.cpp</span> contains the entry point to our program - the `main()` function, which makes a call to our `add()` function.
+```c++
+#include "header.hpp"
+int main() {
+  #ifdef _WIN32
+    int platform_flag = 1;
+  #endif
+  int result = add(2, 3);
+  return 0;
+}
+```
+To compile our pointless program into a single executable file with g++, the command is:
+```bash
+g++ main.cpp source.cpp -o my_program
+```
+When we run this command, each of the source files passed as arguments, in our case `main.cpp` and `source.cpp`, are treated as separate <span className="text-[green] dark:text-[lightgreen]">translation units</span>. Until the backend linking phase, each translation unit is processed independently.
+
+In our example, the order of files doesn't matter, but it some cases it will. We'll discuss why in the backend section on the <a href="#static_linker">static linker</a>.
+
+The `-o` flag allows us to name our executable output. If this isn't provided, the default name is `a.out`.
+
+C++ has 9 <span className="text-[green] dark:text-[lightgreen]">translation phases</span>, though some compiler implementations combine these. We'll separate these further into frontend and backend.
+
 ---
 
 # Frontend
 
-## The Preprocessor
-The preprocessor takes our .cpp files as inputs. It processes all of our <span className="text-[#CF9FFF]">#include</span>, <span className="text-[#CF9FFF]">#define</span>, and <span className="text-[#CF9FFF]">#if</span> directives.
+## Phase 1 - Mapping Source Characters
+First, any operating system-specific end-of-line characters are replaced by the newline escape sequence `\n`. I've used Notepad++ to display the Windows CRLF end-of-line characters in our main.cpp before they're replaced.
 
-We can use the `-E` flag to view the `.i` file that the preprocessor will output: 
-```bash
-g++ -E main.cpp
+![`An example of Windows CRLF end-of-line characters`](/images/blog/c_compilation_process/windows_end_of_line_chars.png)
+
+Then, the bytes representing our individual characters are mapped to the "basic source character set" of the compiler. Any characters in our code that cannot be mapped to the basic source character set are replaced with their universal character names or handled in some implementation-defined manner. For example:
+
+```cpp
+std::cout << "Hello, 世界!";  // '世界' cannot be mapped
 ```
-Output:
-```cli
-# 0 "main.cpp"
-# 0 "<built-in>"
-# 0 "<command-line>"
-# 1 "/usr/include/stdc-predef.h" 1 3 4
-# 0 "<command-line>" 2
-# 1 "main.cpp"
+The above code could become:
+```cpp
+std::cout << "Hello, \u4e16\u754c!";  // Universal character names
+```
+UTF-8 is guarunteed to be supported in C++. Support beyond this is compiler-specific.
 
-# 1 "header.hpp" 1
+We now consider our characters "translation characters".
 
-int add(int a, int b);
-# 3 "main.cpp" 2
-int main(){
- int answer = add(2, 4);
- return 0;
+## Phase 2 - Splicing Lines
+In this phase, if the first translation character is the "byte-order mark" (special Unicode character code U+FEFF), it is removed. This character is typically used as the first character to indicate to software that the file is encoded with big-endian UTF-16. It isn't needed in compilation.
+
+Next, if any lines of code end with a backslach (`\`) followed by 0 or more whitespaces and then the newline character `\n`, the combination of characters is deleted, combining two lines of source code into one logical line. Let's look at situations where this is and is not a problem.
+
+I temporarily modified our main.cpp file to have a backslash character followed by a space at the end of the line where our `add()` function is called:
+```cpp /\\ /
+#include "header.hpp"
+int main() {
+  #ifdef _WIN32
+    int platform_flag = 1;
+  #endif
+  int result = add(2, 3);\ 
+  return 0;
 }
 ```
-The line `#include "header.hpp"` from our original `main.cpp` file has been replaced with the actual code from the `header.hpp` file.
+When we compile again, the executable compiles successfully, but we get this warning:
 
-We can see above, though, that the definition of `add()` from `source.cpp` is not included in the preprocessor output - `source.cpp` isn't being brought in at all yet.
+```ps
+main.cpp:6:26: warning: backslash and newline separated by space
+    6 |   int result = add(2, 3);\
+      |
+```
+In this case line-splicing would not be a problem, as the single logical line would be:
 
-We need to pass all of the .cpp files in our program to `g++` as arguments. We'll explain why in detail in the <a href="#staticlinking">static linking</a> section, but for now we'll add `source.cpp` as an argument and check the preprocessors output again.
+```cpp
+int result = add(2, 3);return 0;
+```
+However, take a look at the following version of main.cpp. I've added a comment that ends in a backslash and a space. Below it, I've defined a new integer variable `a` that is passed as the first argument to the `add()` function.
 
+```c /\\ /
+#include "header.hpp"
+int main() {
+  #ifdef _WIN32
+    int platform_flag = 1;
+  #endif
+  // this comment ends with a backslash and space for some reason\ 
+  int a = 6;
+  int result = add(a, 3);
+  return 0;
+}
+```
+Here, the backslach, space, and newline character at the end of the comment would be deleted during line-splicing, making `int a = 6;` part of the comment, so when we try to compile:
+
+```ps
+main.cpp: In function ‘int main()’:
+main.cpp:8:20: error: ‘a’ was not declared in this scope
+    8 |   int result = add(a, 3);
+      |  
+```
+This is why the compiler warns us when a backslash and a newline are separate by a space. When a line ends with a backslash but no space, most IDE's syntax-highlight the next line as a comment:
+
+```cpp
+// like this\
+int a = 6;
+```
+
+Finally, in this translation phase, if the file isn't empty and doesn't end with the newline character, the newline character is added. This makes sure that all translation units and header files are terminated correctly and are not combined in unexpected ways.
+
+## Phase 3 - Lexing
+Before preprocessing, our source files are split into "preprocessing tokens" separated by whitespace.
+
+During lexing, comments are replaced by one space character.
+
+During this phase, partial tokens will throw errors.
+
+## Phase 4 - The Preprocessor
+The preprocessor takes our .cpp files as inputs. It processes all of the preprocessor directives, which begin with `#`. In our case these are the <span className="text-[purple] dark:text-[#CF9FFF]">#include</span>, <span className="text-[purple] dark:text-[#CF9FFF]">#define</span>, <span className="text-[purple] dark:text-[#CF9FFF]">#ifdef</span>, and <span className="text-[purple] dark:text-[#CF9FFF]">#ifndef</span> directives.
+
+The -E flag in g++ lets you view the preprocessed `.i` file without actually compiling:
 ```bash
 g++ -E main.cpp source.cpp
 ```
+Below is the output. I've left the empty lines in the output for accuracy and so we can explain why they're there.
 ```cli
 # 0 "main.cpp"
 # 0 "<built-in>"
@@ -91,14 +167,19 @@ g++ -E main.cpp source.cpp
 # 1 "/usr/include/stdc-predef.h" 1 3 4
 # 0 "<command-line>" 2
 # 1 "main.cpp"
-
 # 1 "header.hpp" 1
 
+
+
+
 int add(int a, int b);
-# 3 "main.cpp" 2
-int main(){
- int answer = add(2, 4);
- return 0;
+# 2 "main.cpp" 2
+int main() {
+
+ 
+
+  int result = add(2, 3);
+  return 0;
 }
 # 0 "source.cpp"
 # 0 "<built-in>"
@@ -106,19 +187,53 @@ int main(){
 # 1 "/usr/include/stdc-predef.h" 1 3 4
 # 0 "<command-line>" 2
 # 1 "source.cpp"
+# 1 "header.hpp" 1
 
-int add(int a, int b)
-{
- return a + b;
+
+
+
+int add(int a, int b);
+# 2 "source.cpp" 2
+int add(int a, int b) {
+  int sum = a + b;
+  if (sum > 100) {
+    return 100;
+  }
+  return sum;
 }
 ```
+The format of each line in the preprocessor output is `# linenumber filename flags`.
 
+The `#include "header.hpp"` lines from our original `main.cpp` and `source.cpp` files have been replaced with the actual code from the `header.hpp` file.
 
-## Compiler
-Takes in .i file.
+## Phase 5 - Determining Common String Literal Encodings
 
-It can be seen as the bridge between the frontend and backend.
-It performs lexical, syntax, and semantic analysis on the preprocessed .i file using trees, before converting the frontend trees to an intermediate representation code (IR) that backend can understand, currently GIMPLE with C and C++ frontends.
+## Phase 6 - Concatenating String Literals
+
+## Phase 7 - Compiler
+Takes in .i files from the preprocessor.
+
+In this phase, the compiler performs lexical, syntax, and semantic analysis on the preprocessed source code.
+
+### Lexical Anaylsis (lexing)
+Tokenizes the source code into meaningful symbols or tokens. These tokens are the basic elements of the programming language, such as keywords, operators, identifiers, and literals.
+(GIVE TOKEN EXAMPLES IN C++)
+
+### Syntax Analysis (parsing)
+After tokenisation, the frontend checks the structure of the code according to the grammar rules of the programming language. It generates a syntax tree or abstract syntax tree (AST), which represents the hierarchical structure of the code. This parsing stage builds a tree to analyse syntax (show image), and we can dump it in g++ with `-fdump-tree-all-graph -g main.cpp source.cpp` (-g for debugging). This saves files to current directory and the files we want to look at are .dot files.
+
+### Semantic Analysis
+The frontend then performs checks on the syntax tree to ensure that the code is semantically correct. This includes type checking, scope resolution, and ensuring that operations are valid.
+
+## Phase 8 - Instantiating Templates
+The compiler instantiates templates. (explain more as to how it relates to the below)
+
+It then converts the frontend trees to an intermediate representation code (IR) that backend can understand, currently GIMPLE with C and C++ frontends.
+
+This is when IR is generated.
+
+### GIMPLE (C++ Intermediate Representation)
+In g++ the intermediate representation is code rather than a data structure - code called gimple.
 
 The flag `-fdump-tree-gimple` allows us to dump gimple files to our directory.
 
@@ -154,14 +269,20 @@ int add (int a, int b)
 }
 ```
 
+As code is now in IR, it can be optimised in that format for all languages.
+
+Optimization and Target-Specific Code Generation (hidden from the user)
+
+Optimises the intermediate representation given by the frontend and then gives target specific assembly.
+
 ---
 
 # Backend
 
-## Compiler cont'd. - Optimization and Target-Specific Code Generation (hidden from the user)
-Optimises the intermediate representation given by the frontend and then gives target specific assembly.
-outputs intermediate representation source.s (Intermediate representation)
-outputs .s file
+
+
+Outputs .s file for assembler.
+
 
 ## Assembler
 Takes in .s
@@ -170,10 +291,10 @@ Outputs object files with source.o
 ## Symbols <span id="symbols"></span>
 Explain symbols, and that .o files have symbol tables. These are resolved during linking, which means that order of files in linking matters. This is because the linker needs to have seen undefined symbols and be looking for their implementations in following files.
 
-## Static Linker
+## Static Linker <span id="#static_linker"></span>
 Takes in .o files and resolves symbols (names of variables, functions, sections etc) in the .o file's symbol table with actual implementations in other .o files listed in command. Order matters.
 
-As mentioned in the preprocessor section earlier, when we try to actually compile `main.cpp` withouth passing in `source.cpp` like this...
+When we try to compile `main.cpp` withouth passing in `source.cpp` like this...
 
 ```bash
 g++ main.cpp
@@ -187,14 +308,22 @@ main.cpp:(.text+0x17): undefined reference to `add(int, int)'
 collect2: error: ld returned 1 exit status
 ```
 
-The program `/usr/bin/ld` in the error above is the linker.
+`source.cpp` isn't being brought, so there's no definition of `add()`. We need to pass all of the .cpp files in our program to `g++` as arguments.
 
-Notice that the error says <strong className="text-[brown] dark:text-[bisque]">undefined</strong> reference. The linker knows about `add()` from the <a href="#symbols">symbol</a> in the `header.hpp` file included by the preprocessor, however, there's no <strong className="text-[navy] dark:text-[skyblue]">definition.</strong>
+The program `/usr/bin/ld` in the error above is the linker. Notice that the error says <strong className="text-[brown] dark:text-[bisque]">undefined</strong> reference. The linker knows about `add()` from the <a href="#symbols">symbol</a> in the `header.hpp` file included by the preprocessor, however, there's no <strong className="text-[navy] dark:text-[skyblue]">definition.</strong>
 
 If we remove `#include "header.hpp"` from our `main.cpp` file and run take a look at the preprocessor output again...
 ```
 g++ -E main.cpp
 ```
+We get a different error:
+```cli
+main.cpp: In function ‘int main()’:
+main.cpp:8:16: error: ‘add’ was not declared in this scope
+    8 |   int result = add(2, 3);
+      |                ^~~
+```
+This time, `add()` was never even declared as the header containing the symbol is missing.
 
 ## Dynamic Linker
 Takes in .o files and links unresolved symbols in .o symbol table with shared (dynamic) libraries on the target system such as Windows .dll (dynamic-link libraries) files.
